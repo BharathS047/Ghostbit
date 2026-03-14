@@ -26,7 +26,7 @@ st.set_page_config(
     page_title="GhostBit - Steganography Framework",
     page_icon="👻",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 st.markdown("""
@@ -149,15 +149,10 @@ def render_embed_tab():
     Supported formats: PNG (images), WAV (audio), MP4 (video)
     """)
     
-    with st.sidebar:
-        st.subheader("Advanced Settings")
-        
-        st.markdown("**Image Settings**")
-        bits_per_channel = st.slider("Bits per channel", 1, 4, 1, key="img_bpc")
-        
-        st.markdown("**Audio Settings**")
-        frame_size = st.selectbox("Frame size", [1024, 2048, 4096], index=1)
-        hop_length = st.selectbox("Hop length", [512, 1024, 2048], index=1)
+    bits_per_channel = 1
+    frame_size = 2048
+    hop_length = 1024
+
     
     cover_file = st.file_uploader(
         "Upload Cover Media (PNG/WAV/MP4)",
@@ -295,15 +290,10 @@ def render_extract_tab():
     You will need your private key to decrypt the message.
     """)
     
-    with st.sidebar:
-        st.subheader("Extraction Settings")
-        
-        st.markdown("**Image Settings**")
-        extract_bpc = st.slider("Bits per channel", 1, 4, 1, key="extract_img_bpc")
-        
-        st.markdown("**Audio Settings**")
-        extract_frame_size = st.selectbox("Frame size", [1024, 2048, 4096], index=1, key="extract_fs")
-        extract_hop_length = st.selectbox("Hop length", [512, 1024, 2048], index=1, key="extract_hl")
+    extract_bpc = 1
+    extract_frame_size = 2048
+    extract_hop_length = 1024
+
     
     stego_file = st.file_uploader(
         "Upload Stego Media (PNG/WAV/MP4)",
