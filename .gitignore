@@ -1,0 +1,44 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+
+# Logs
+*.log
+
+# Keys (NEVER commit these)
+*.pem
+private_key*
+secret_key*
+
+# Stego files (large)
+stego_*
+
+# Documentation build
+docs/_build/
