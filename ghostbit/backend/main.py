@@ -53,7 +53,7 @@ app.include_router(admin_router)
 app.include_router(scores_router)
 
 # --- Access control dependency for GhostBit stego APIs ---
-approved_only = require_role("approved", "admin")
+approved_only = require_role("Approved", "Admin")
 
 def get_media_type_from_filename(filename: str) -> str:
     ext = filename.lower().split('.')[-1]

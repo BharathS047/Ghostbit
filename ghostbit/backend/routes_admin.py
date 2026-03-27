@@ -11,11 +11,11 @@ from .auth import require_role
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
-admin_only = require_role("admin")
+admin_only = require_role("Admin")
 
 
 class RoleUpdate(BaseModel):
-    role: str = Field(pattern="^(decoy|approved|admin)$")
+    role: str = Field(pattern="^(Decoy|Approved|Admin)$")
 
 
 class UserOut(BaseModel):

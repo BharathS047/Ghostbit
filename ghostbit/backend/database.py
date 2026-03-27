@@ -39,8 +39,8 @@ def init_db():
             verification_token  TEXT,
             reset_token         TEXT,
             token_expiry        TEXT,
-            role                TEXT    NOT NULL DEFAULT 'decoy'
-                                        CHECK(role IN ('decoy', 'approved', 'admin')),
+            role                TEXT    NOT NULL DEFAULT 'Decoy'
+                                        CHECK(role IN ('Decoy', 'Approved', 'Admin')),
             created_at          TEXT    NOT NULL
         );
 
@@ -85,7 +85,7 @@ def init_db():
 def create_user(
     username: str,
     hashed_password: str,
-    role: str = "decoy",
+    role: str = "Decoy",
     email: str | None = None,
     verification_token: str | None = None,
     token_expiry: str | None = None,
@@ -133,7 +133,7 @@ def list_users() -> list[dict]:
 
 
 def update_user_role(user_id: int, role: str) -> dict | None:
-    if role not in ("decoy", "approved", "admin"):
+    if role not in ("Decoy", "Approved", "Admin"):
         raise ValueError(f"Invalid role: {role}")
     conn = get_connection()
     conn.execute("UPDATE users SET role = ? WHERE id = ?", (role, user_id))
@@ -223,9 +223,9 @@ def seed_admin_user(
             (email, username),
         ).fetchone()
         if existing:
-            if existing["role"] != "admin":
+            if existing["role"] != "Admin":
                 conn.execute(
-                    "UPDATE users SET role = 'admin', is_verified = 1 WHERE id = ?",
+                    "UPDATE users SET role = 'Admin', is_verified = 1 WHERE id = ?",
                     (existing["id"],),
                 )
                 conn.commit()
@@ -235,7 +235,7 @@ def seed_admin_user(
             """INSERT INTO users
                (username, password, role, email, is_verified,
                 verification_token, token_expiry, created_at)
-               VALUES (?, ?, 'admin', ?, 1, NULL, NULL, ?)""",
+               VALUES (?, ?, 'Admin', ?, 1, NULL, NULL, ?)""",
             (username, hashed_password, email, now),
         )
         conn.commit()

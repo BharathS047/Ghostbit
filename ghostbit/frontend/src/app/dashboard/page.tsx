@@ -15,7 +15,7 @@ type Tab = "home" | "keys" | "embed" | "extract";
 
 export default function DashboardPage() {
   return (
-    <RouteGuard allowed={["approved", "admin"]}>
+    <RouteGuard allowed={["Approved", "Admin"]}>
       <DashboardContent />
     </RouteGuard>
   );

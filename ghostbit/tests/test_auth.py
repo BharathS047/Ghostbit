@@ -39,7 +39,7 @@ class TestSignup:
         res = client.post("/auth/signup", json={"username": "alice", "password": "password123"})
         assert res.status_code == 200
         data = res.json()
-        assert data["role"] == "decoy"
+        assert data["role"] == "Decoy"
         assert data["username"] == "alice"
         assert "access_token" in data
 
@@ -83,7 +83,7 @@ class TestMe:
         me = client.get("/auth/me", headers={"Authorization": f"Bearer {token}"})
         assert me.status_code == 200
         assert me.json()["username"] == "dave"
-        assert me.json()["role"] == "decoy"
+        assert me.json()["role"] == "Decoy"
 
     def test_me_without_token(self):
         res = client.get("/auth/me")
@@ -103,7 +103,7 @@ def _create_user_with_role(username, password, role):
     from ghostbit.backend.database import get_connection
     signup_res = client.post("/auth/signup", json={"username": username, "password": password})
     token = signup_res.json()["access_token"]
-    if role != "decoy":
+    if role != "Decoy":
         conn = get_connection()
         conn.execute("UPDATE users SET role = ? WHERE username = ?", (role, username))
         conn.commit()
@@ -117,9 +117,9 @@ def _create_user_with_role(username, password, role):
 class TestAccessControl:
     @pytest.fixture(autouse=True, scope="class")
     def setup_users(self):
-        self.__class__.decoy_token = _create_user_with_role("ac_decoy", "password123", "decoy")
-        self.__class__.approved_token = _create_user_with_role("ac_approved", "password123", "approved")
-        self.__class__.admin_token = _create_user_with_role("ac_admin", "password123", "admin")
+        self.__class__.decoy_token = _create_user_with_role("ac_decoy", "password123", "Decoy")
+        self.__class__.approved_token = _create_user_with_role("ac_approved", "password123", "Approved")
+        self.__class__.admin_token = _create_user_with_role("ac_admin", "password123", "Admin")
 
     def test_decoy_cannot_access_keys(self):
         res = client.post("/api/keys/generate", headers={"Authorization": f"Bearer {self.decoy_token}"})
@@ -142,9 +142,9 @@ class TestAccessControl:
 class TestAdminEndpoints:
     @pytest.fixture(autouse=True, scope="class")
     def setup_users(self):
-        self.__class__.admin_token = _create_user_with_role("adm_admin", "password123", "admin")
-        self.__class__.approved_token = _create_user_with_role("adm_approved", "password123", "approved")
-        self.__class__.decoy_token = _create_user_with_role("adm_decoy", "password123", "decoy")
+        self.__class__.admin_token = _create_user_with_role("adm_admin", "password123", "Admin")
+        self.__class__.approved_token = _create_user_with_role("adm_approved", "password123", "Approved")
+        self.__class__.decoy_token = _create_user_with_role("adm_decoy", "password123", "Decoy")
 
     def test_admin_can_list_users(self):
         res = client.get("/admin/users", headers={"Authorization": f"Bearer {self.admin_token}"})
@@ -166,11 +166,11 @@ class TestAdminEndpoints:
 
         res = client.put(
             f"/admin/users/{decoy_user['id']}/role",
-            json={"role": "approved"},
+            json={"role": "Approved"},
             headers={"Authorization": f"Bearer {self.admin_token}"},
         )
         assert res.status_code == 200
-        assert res.json()["role"] == "approved"
+        assert res.json()["role"] == "Approved"
 
     def test_admin_can_view_logs(self):
         res = client.get("/admin/logs", headers={"Authorization": f"Bearer {self.admin_token}"})
@@ -198,7 +198,7 @@ class TestAdminEndpoints:
 
 class TestHoneypotLogging:
     def test_decoy_action_logged(self):
-        token = _create_user_with_role("honeypot_user", "password123", "decoy")
+        token = _create_user_with_role("honeypot_user", "password123", "Decoy")
         res = client.post(
             "/api/honeypot/action",
             json={"action": "test_action"},

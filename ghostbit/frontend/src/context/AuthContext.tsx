@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-export type Role = "decoy" | "approved" | "admin";
+export type Role = "Decoy" | "Approved" | "Admin";
 
 interface User {
   id: number;
@@ -61,13 +61,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   function redirectByRole(role: Role) {
     switch (role) {
-      case "admin":
+      case "Admin":
         router.push("/admin");
         break;
-      case "approved":
+      case "Approved":
         router.push("/dashboard");
         break;
-      case "decoy":
+      case "Decoy":
       default:
         router.push("/play");
         break;

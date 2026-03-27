@@ -28,10 +28,10 @@ function LoginForm() {
   useEffect(() => {
     if (!loading && user) {
       switch (user.role) {
-        case "admin":
+        case "Admin":
           router.push("/admin");
           break;
-        case "approved":
+        case "Approved":
           router.push("/dashboard");
           break;
         default:

@@ -22,10 +22,10 @@ export default function Home() {
       return;
     }
     switch (user.role) {
-      case "admin":
+      case "Admin":
         router.replace("/admin");
         break;
-      case "approved":
+      case "Approved":
         router.replace("/dashboard");
         break;
       default:

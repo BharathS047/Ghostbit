@@ -22,10 +22,10 @@ export default function RouteGuard({ allowed, children }: Props) {
     if (!allowed.includes(user.role)) {
       // Redirect to correct page for their role
       switch (user.role) {
-        case "admin":
+        case "Admin":
           router.push("/admin");
           break;
-        case "approved":
+        case "Approved":
           router.push("/dashboard");
           break;
         default:

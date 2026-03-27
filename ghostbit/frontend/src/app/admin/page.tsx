@@ -15,7 +15,7 @@ interface UserRecord {
 
 export default function AdminPage() {
   return (
-    <RouteGuard allowed={["admin"]}>
+    <RouteGuard allowed={["Admin"]}>
       <AdminDashboard />
     </RouteGuard>
   );
@@ -132,24 +132,24 @@ function UsersTable({
   currentUserId: number;
   onChangeRole: (id: number, role: string) => void;
 }) {
-  const roles = ["decoy", "approved", "admin"] as const;
+  const roles = ["Decoy", "Approved", "Admin"] as const;
 
   const roleButtonStyle: Record<string, { bg: string; color: string; border: string; shadow: string; label: string }> = {
-    approved: {
+    Approved: {
       bg: "rgba(34,197,94,0.15)",
       color: "#22c55e",
       border: "1px solid rgba(34,197,94,0.5)",
       shadow: "0 0 8px rgba(34,197,94,0.2)",
       label: "Approve",
     },
-    admin: {
+    Admin: {
       bg: "rgba(239,68,68,0.15)",
       color: "#ef4444",
       border: "1px solid rgba(239,68,68,0.5)",
       shadow: "0 0 8px rgba(239,68,68,0.2)",
       label: "Make Admin",
     },
-    decoy: {
+    Decoy: {
       bg: "rgba(234,179,8,0.12)",
       color: "#eab308",
       border: "1px solid rgba(234,179,8,0.4)",
@@ -223,11 +223,11 @@ function UsersTable({
 
 function RoleBadge({ role }: { role: string }) {
   const colors: Record<string, { bg: string; text: string; border: string }> = {
-    admin: { bg: "rgba(239,68,68,0.12)", text: "#ef4444", border: "rgba(239,68,68,0.3)" },
-    approved: { bg: "rgba(34,197,94,0.12)", text: "#22c55e", border: "rgba(34,197,94,0.3)" },
-    decoy: { bg: "rgba(234,179,8,0.12)", text: "#eab308", border: "rgba(234,179,8,0.3)" },
+    Admin: { bg: "rgba(239,68,68,0.12)", text: "#ef4444", border: "rgba(239,68,68,0.3)" },
+    Approved: { bg: "rgba(34,197,94,0.12)", text: "#22c55e", border: "rgba(34,197,94,0.3)" },
+    Decoy: { bg: "rgba(234,179,8,0.12)", text: "#eab308", border: "rgba(234,179,8,0.3)" },
   };
-  const c = colors[role] || colors.decoy;
+  const c = colors[role] || colors.Decoy;
   return (
     <span
       className="inline-block px-2.5 py-1 rounded text-xs font-mono font-semibold"

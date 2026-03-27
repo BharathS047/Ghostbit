@@ -116,11 +116,11 @@ export default function PlayPage() {
   // Redirect approved/admin users away
   useEffect(() => {
     if (loading) return;
-    if (user?.role === "approved") {
+    if (user?.role === "Approved") {
       router.replace("/dashboard");
       return;
     }
-    if (user?.role === "admin") {
+    if (user?.role === "Admin") {
       router.replace("/admin");
       return;
     }
