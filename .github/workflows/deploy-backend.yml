@@ -45,9 +45,12 @@ jobs:
             antenv/ \
             -x "**/__pycache__/*" "**/*.pyc" "**/*.db"
 
-      - name: Deploy to Azure App Service
-        uses: azure/webapps-deploy@v3
+      - name: Azure Login
+        uses: azure/login@v2
         with:
-          app-name: ghostbit-api
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: deploy.zip
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to App Service
+        run: |
+          az webapp deploy --resource-group ghostbit-rg --name ghostbit-api \
+            --src-path deploy.zip --type zip --async true
