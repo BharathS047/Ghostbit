@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <rect width="320" height="200" fill="#1a0010"/>
+  <defs>
+    <linearGradient id="g6" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#831843"/>
+      <stop offset="100%" stop-color="#1a0010"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="200" fill="url(#g6)" opacity="0.6"/>
+  <!-- Scattered letter tiles -->
+  <!-- Tile helper: rect + letter -->
+  <rect x="22" y="30" width="44" height="44" rx="8" fill="#500724" stroke="#f472b6" stroke-width="1.5"/>
+  <text x="44" y="59" text-anchor="middle" font-family="monospace" font-size="22" font-weight="bold" fill="#f9a8d4">W</text>
+
+  <rect x="78" y="18" width="44" height="44" rx="8" fill="#500724" stroke="#f472b6" stroke-width="1.5" transform="rotate(-6 100 40)"/>
+  <text x="100" y="48" text-anchor="middle" font-family="monospace" font-size="22" font-weight="bold" fill="#f9a8d4" transform="rotate(-6 100 40)">O</text>
+
+  <rect x="136" y="24" width="44" height="44" rx="8" fill="#9d174d" stroke="#fb7185" stroke-width="2" transform="rotate(4 158 46)"/>
+  <text x="158" y="54" text-anchor="middle" font-family="monospace" font-size="22" font-weight="bold" fill="#fda4af" transform="rotate(4 158 46)">R</text>
+
+  <rect x="196" y="14" width="44" height="44" rx="8" fill="#500724" stroke="#f472b6" stroke-width="1.5" transform="rotate(-8 218 36)"/>
+  <text x="218" y="43" text-anchor="middle" font-family="monospace" font-size="22" font-weight="bold" fill="#f9a8d4" transform="rotate(-8 218 36)">D</text>
+
+  <rect x="258" y="28" width="44" height="44" rx="8" fill="#500724" stroke="#f472b6" stroke-width="1.5" transform="rotate(5 280 50)"/>
+  <text x="280" y="58" text-anchor="middle" font-family="monospace" font-size="22" font-weight="bold" fill="#f9a8d4" transform="rotate(5 280 50)">S</text>
+
+  <!-- Row 2 -->
+  <rect x="40" y="100" width="44" height="44" rx="8" fill="#500724" stroke="#f472b6" stroke-width="1.5" transform="rotate(7 62 122)"/>
+  <text x="62" y="129" text-anchor="middle" font-family="monospace" font-size="22" font-weight="bold" fill="#f9a8d4" transform="rotate(7 62 122)">C</text>
+
+  <rect x="108" y="88" width="44" height="44" rx="8" fill="#500724" stroke="#f472b6" stroke-width="1.5" transform="rotate(-5 130 110)"/>
+  <text x="130" y="117" text-anchor="middle" font-family="monospace" font-size="22" font-weight="bold" fill="#f9a8d4" transform="rotate(-5 130 110)">R</text>
+
+  <rect x="174" y="94" width="44" height="44" rx="8" fill="#9d174d" stroke="#fb7185" stroke-width="2"/>
+  <text x="196" y="123" text-anchor="middle" font-family="monospace" font-size="22" font-weight="bold" fill="#fda4af">A</text>
+
+  <rect x="240" y="86" width="44" height="44" rx="8" fill="#500724" stroke="#f472b6" stroke-width="1.5" transform="rotate(6 262 108)"/>
+  <text x="262" y="115" text-anchor="middle" font-family="monospace" font-size="22" font-weight="bold" fill="#f9a8d4" transform="rotate(6 262 108)">M</text>
+
+  <!-- Answer row (correct word highlighted) -->
+  <rect x="60" y="152" width="44" height="40" rx="7" fill="#831843" stroke="#f43f5e" stroke-width="2"/>
+  <text x="82" y="178" text-anchor="middle" font-family="monospace" font-size="20" font-weight="bold" fill="#fff">W</text>
+  <rect x="112" y="152" width="44" height="40" rx="7" fill="#831843" stroke="#f43f5e" stroke-width="2"/>
+  <text x="134" y="178" text-anchor="middle" font-family="monospace" font-size="20" font-weight="bold" fill="#fff">O</text>
+  <rect x="164" y="152" width="44" height="40" rx="7" fill="#831843" stroke="#f43f5e" stroke-width="2"/>
+  <text x="186" y="178" text-anchor="middle" font-family="monospace" font-size="20" font-weight="bold" fill="#fff">R</text>
+  <rect x="216" y="152" width="44" height="40" rx="7" fill="#831843" stroke="#f43f5e" stroke-width="2"/>
+  <text x="238" y="178" text-anchor="middle" font-family="monospace" font-size="20" font-weight="bold" fill="#fff">D</text>
+</svg>

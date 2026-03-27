@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <rect width="320" height="200" fill="#1a0a38"/>
+  <defs>
+    <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4c1d95"/>
+      <stop offset="100%" stop-color="#1e0a4a"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="200" fill="url(#g3)" opacity="0.6"/>
+  <!-- 4x3 card grid -->
+  <!-- Row 1 -->
+  <!-- Card face-down -->
+  <rect x="20" y="28" width="60" height="46" rx="7" fill="#2e1065" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="50" y="57" text-anchor="middle" font-size="20" fill="#7c3aed" opacity="0.5">?</text>
+  <!-- Card matched (♠) -->
+  <rect x="90" y="28" width="60" height="46" rx="7" fill="#3b0764" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="120" y="57" text-anchor="middle" font-size="22" fill="#c4b5fd">♠</text>
+  <!-- Card matched (♠) -->
+  <rect x="160" y="28" width="60" height="46" rx="7" fill="#3b0764" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="190" y="57" text-anchor="middle" font-size="22" fill="#c4b5fd">♠</text>
+  <!-- Card face-down -->
+  <rect x="230" y="28" width="60" height="46" rx="7" fill="#2e1065" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="260" y="57" text-anchor="middle" font-size="20" fill="#7c3aed" opacity="0.5">?</text>
+  <!-- Row 2 -->
+  <!-- Card flipped (♥) -->
+  <rect x="20" y="82" width="60" height="46" rx="7" fill="#4c1d95" stroke="#c084fc" stroke-width="1.5"/>
+  <text x="50" y="111" text-anchor="middle" font-size="22" fill="#e879f9">♥</text>
+  <!-- Card face-down -->
+  <rect x="90" y="82" width="60" height="46" rx="7" fill="#2e1065" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="120" y="111" text-anchor="middle" font-size="20" fill="#7c3aed" opacity="0.5">?</text>
+  <!-- Card face-down -->
+  <rect x="160" y="82" width="60" height="46" rx="7" fill="#2e1065" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="190" y="111" text-anchor="middle" font-size="20" fill="#7c3aed" opacity="0.5">?</text>
+  <!-- Card flipped (♥) -->
+  <rect x="230" y="82" width="60" height="46" rx="7" fill="#4c1d95" stroke="#c084fc" stroke-width="1.5"/>
+  <text x="260" y="111" text-anchor="middle" font-size="22" fill="#e879f9">♥</text>
+  <!-- Row 3 -->
+  <rect x="20" y="136" width="60" height="46" rx="7" fill="#2e1065" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="50" y="165" text-anchor="middle" font-size="20" fill="#7c3aed" opacity="0.5">?</text>
+  <rect x="90" y="136" width="60" height="46" rx="7" fill="#2e1065" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="120" y="165" text-anchor="middle" font-size="20" fill="#7c3aed" opacity="0.5">?</text>
+  <rect x="160" y="136" width="60" height="46" rx="7" fill="#2e1065" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="190" y="165" text-anchor="middle" font-size="20" fill="#7c3aed" opacity="0.5">?</text>
+  <rect x="230" y="136" width="60" height="46" rx="7" fill="#2e1065" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="260" y="165" text-anchor="middle" font-size="20" fill="#7c3aed" opacity="0.5">?</text>
+</svg>

@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react";
 
 const _0x4a = [
-  0x9C4, 0.8, 1, 0.8, 0.3, 80, 1, 5, 0.5, 0.04, 0.88, 50, 2.5, 3, 0.15, 8,
+  0xDAC, 1, 1, 1.2, 0.4, 100, 1, 5, 0.5, 0.06, 0.88, 50, 2.5, 3, 0.15, 8,
 ];
 const _0xf3 = (() => {
   const _a = 0x3;
@@ -10,7 +10,7 @@ const _0xf3 = (() => {
 })();
 const _t = (v: number, a: number, b: number, c: number, d: number): number =>
   a === b ? c : c + ((v - a) / (b - a)) * (d - c);
-const _0xc = [0xc8, 0xe6, 0x00].reduce(
+const _0xc = [0xef, 0x44, 0x44].reduce(
   (s, v) => s + v.toString(16).padStart(2, "0"),
   "#"
 );
@@ -111,13 +111,13 @@ export default function ParticleSphere() {
       }
       _im.instanceMatrix.needsUpdate = true;
 
-      const _ic = new Float32Array(n * 3);
+      const _cl_red = new _C(0xef4444);
+      const _cl_white = new _C(0xffffff);
       for (let i = 0; i < n; i++) {
-        _ic[i * 3] = _cl.r;
-        _ic[i * 3 + 1] = _cl.g;
-        _ic[i * 3 + 2] = _cl.b;
+        const _cl = i % 2 === 0 ? _cl_white : _cl_red;
+        _im.setColorAt(i, _cl);
       }
-      (_im as any).instanceColor = new _F(_ic, 3);
+      if (_im.instanceColor) _im.instanceColor.needsUpdate = true;
 
       const _qg = new _Q();
       _qg.add(_im);

@@ -42,3 +42,19 @@ stego_*
 
 # Documentation build
 docs/_build/
+
+# Node
+node_modules/
+.next/
+
+# Database
+*.db
+
+# Deploy artifacts
+deploy_backend.zip
+logs*.zip
+logs_out*/
+startup.sh
+
+# Azure
+.env

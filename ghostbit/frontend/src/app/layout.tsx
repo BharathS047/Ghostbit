@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "../context/AuthContext";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -13,9 +14,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GhostBit — Secure Steganography Framework",
+  title: "GhostPlay — Free Browser Games",
   description:
-    "Hide encrypted messages in images, audio, and video using military-grade AES-256 encryption and content-adaptive steganography.",
+    "Play free browser games instantly. No downloads, no installs. Tic Tac Toe, Snake, Memory Match and more.",
 };
 
 export default function RootLayout({
@@ -28,7 +29,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
       >
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

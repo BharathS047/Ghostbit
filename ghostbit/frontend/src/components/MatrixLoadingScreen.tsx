@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 
 export default function MatrixLoadingScreen({ text }: { text: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -28,13 +29,13 @@ export default function MatrixLoadingScreen({ text }: { text: string }) {
         const x = i * fontSize;
         const y = drops[i] * fontSize;
 
-        // Head character (bright cyan)
-        ctx.fillStyle = "#22d3ee";
+        // Head character (bright red)
+        ctx.fillStyle = "#58ef44ff";
         ctx.font = `bold ${fontSize}px JetBrains Mono, monospace`;
         ctx.fillText(char, x, y);
 
-        // Trail (green fading)
-        ctx.fillStyle = `rgba(16, 185, 129, ${0.5 + Math.random() * 0.3})`;
+        // Trail (red fading)
+        ctx.fillStyle = `rgba(220, 38, 38, ${0.5 + Math.random() * 0.3})`;
         ctx.font = `${fontSize}px JetBrains Mono, monospace`;
         if (drops[i] > 1) {
           const trailChar = chars[Math.floor(Math.random() * chars.length)];
@@ -68,25 +69,27 @@ export default function MatrixLoadingScreen({ text }: { text: string }) {
     };
   }, [startMatrix]);
 
-  return (
+  const content = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center">
       <canvas ref={canvasRef} className="absolute inset-0" />
       <div
         className="relative z-10 px-12 py-8 rounded-2xl text-center animate-fade-in-up"
         style={{
           background: "rgba(3, 7, 18, 0.85)",
-          border: "1px solid rgba(34, 211, 238, 0.3)",
-          boxShadow: "0 0 60px rgba(34, 211, 238, 0.2), inset 0 1px 0 rgba(255,255,255,0.05)",
+          border: "1px solid rgba(239, 68, 68, 0.3)",
+          boxShadow: "0 0 60px rgba(239, 68, 68, 0.2), inset 0 1px 0 rgba(255,255,255,0.05)",
           backdropFilter: "blur(12px)",
         }}
       >
         {/* Spinner */}
         <div className="flex justify-center mb-5">
-          <div className="w-10 h-10 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(34,211,238,0.2)", borderTopColor: "#22d3ee" }} />
+          <div className="w-10 h-10 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(239,68,68,0.2)", borderTopColor: "#ef4444" }} />
         </div>
         <p className="text-xl md:text-2xl font-bold text-gradient">{text}</p>
         <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>This may take a moment...</p>
       </div>
     </div>
   );
+
+  return typeof document !== "undefined" ? createPortal(content, document.body) : null;
 }
