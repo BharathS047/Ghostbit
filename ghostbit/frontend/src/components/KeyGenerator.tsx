@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export default function KeyGenerator() {
   const [keys, setKeys] = useState<{ public: string; private: string } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -9,7 +11,11 @@ export default function KeyGenerator() {
   const generateKeys = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/keys/generate", { method: "POST" });
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API}/api/keys/generate`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       const data = await res.json();
       setKeys({ public: data.public_key, private: data.private_key });
     } catch {

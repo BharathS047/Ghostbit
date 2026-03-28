@@ -3,6 +3,8 @@
 import { useState, useRef } from "react";
 import MatrixLoadingScreen from "./MatrixLoadingScreen";
 
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export default function EmbedForm() {
   const [file, setFile] = useState<File | null>(null);
   const [publicKey, setPublicKey] = useState("");
@@ -17,9 +19,11 @@ export default function EmbedForm() {
     const formData = new FormData();
     formData.append("file", selectedFile);
     try {
-      const res = await fetch("http://localhost:8000/api/capacity", {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API}/api/capacity`, {
         method: "POST",
         body: formData,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const data = await res.json();
       setCapacity(data.capacity);
@@ -39,12 +43,13 @@ export default function EmbedForm() {
     if (!file || !publicKey || !message) return;
     setLoading(true);
     try {
+      const token = localStorage.getItem("token");
       const formData = new FormData();
       formData.append("cover_file", file);
       formData.append("public_key", publicKey);
       formData.append("message", message);
       const [res] = await Promise.all([
-        fetch("http://localhost:8000/api/embed", { method: "POST", body: formData }),
+        fetch(`${API}/api/embed`, { method: "POST", body: formData, headers: token ? { Authorization: `Bearer ${token}` } : {} }),
         new Promise((r) => setTimeout(r, 3000)),
       ]);
       if (!res.ok) throw new Error(await res.text());

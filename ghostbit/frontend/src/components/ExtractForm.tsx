@@ -3,6 +3,8 @@
 import { useState, useRef } from "react";
 import MatrixLoadingScreen from "./MatrixLoadingScreen";
 
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export default function ExtractForm() {
   const [file, setFile] = useState<File | null>(null);
   const [privateKey, setPrivateKey] = useState("");
@@ -23,11 +25,12 @@ export default function ExtractForm() {
     setLoading(true);
     setResult(null);
     try {
+      const token = localStorage.getItem("token");
       const formData = new FormData();
       formData.append("stego_file", file);
       formData.append("private_key", privateKey);
       const [res] = await Promise.all([
-        fetch("http://localhost:8000/api/extract", { method: "POST", body: formData }),
+        fetch(`${API}/api/extract`, { method: "POST", body: formData, headers: token ? { Authorization: `Bearer ${token}` } : {} }),
         new Promise((r) => setTimeout(r, 3000)),
       ]);
       if (!res.ok) throw new Error(await res.text());
