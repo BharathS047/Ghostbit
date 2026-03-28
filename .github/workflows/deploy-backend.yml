@@ -21,17 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: |
-          python -m venv antenv
-          source antenv/bin/activate
-          pip install -r requirements.txt
-
       - name: Create deployment package
         run: |
           zip -r deploy.zip \
@@ -42,7 +31,6 @@ jobs:
             ghostbit/metrics/ \
             ghostbit/stego/ \
             requirements.txt \
-            antenv/ \
             -x "**/__pycache__/*" "**/*.pyc" "**/*.db"
 
       - name: Azure Login
@@ -53,4 +41,4 @@ jobs:
       - name: Deploy to App Service
         run: |
           az webapp deploy --resource-group ghostbit-rg --name ghostbit-api \
-            --src-path deploy.zip --type zip --async true
+            --src-path deploy.zip --type zip
