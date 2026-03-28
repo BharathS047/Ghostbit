@@ -11,7 +11,7 @@ export default function KeyGenerator() {
   const generateKeys = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("ghostbit_token");
       const res = await fetch(`${API}/api/keys/generate`, {
         method: "POST",
         headers: token ? { Authorization: `Bearer ${token}` } : {},

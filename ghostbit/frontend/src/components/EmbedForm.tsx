@@ -19,7 +19,7 @@ export default function EmbedForm() {
     const formData = new FormData();
     formData.append("file", selectedFile);
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("ghostbit_token");
       const res = await fetch(`${API}/api/capacity`, {
         method: "POST",
         body: formData,
@@ -43,7 +43,7 @@ export default function EmbedForm() {
     if (!file || !publicKey || !message) return;
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("ghostbit_token");
       const formData = new FormData();
       formData.append("cover_file", file);
       formData.append("public_key", publicKey);

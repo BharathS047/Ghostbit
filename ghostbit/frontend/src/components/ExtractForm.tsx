@@ -25,7 +25,7 @@ export default function ExtractForm() {
     setLoading(true);
     setResult(null);
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("ghostbit_token");
       const formData = new FormData();
       formData.append("stego_file", file);
       formData.append("private_key", privateKey);
