@@ -39,6 +39,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy to App Service
-        run: |
-          az webapp deploy --resource-group ghostbit-rg --name ghostbit-api \
-            --src-path deploy.zip --type zip
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ghostbit-api
+          package: deploy.zip
