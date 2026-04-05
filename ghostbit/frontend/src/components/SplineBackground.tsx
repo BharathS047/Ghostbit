@@ -52,11 +52,11 @@ export default function SplineBackground() {
         zIndex: 0,
         width: "100%",
         height: "100%",
-        opacity: 1, // Full opacity to make the 3D element as visible and bright as possible
+        pointerEvents: "none",
       }}
     >
-      <Spline 
-        scene="https://prod.spline.design/D71snLIIxZPtQbcp/scene.splinecode" 
+      <Spline
+        scene="https://prod.spline.design/D71snLIIxZPtQbcp/scene.splinecode"
         onLoad={onLoad}
       />
     </div>

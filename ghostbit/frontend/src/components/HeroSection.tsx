@@ -13,15 +13,11 @@ export default function HeroSection() {
       {/* Spline 3D background */}
       <SplineBackground />
 
-      {/* Soft dark overlay to make GhostPlay text pop - Must have pointer-events-none so Spline gets mouse movement */}
+      {/* Soft dark overlay */}
       <div className="absolute inset-0 bg-black/20 pointer-events-none" />
 
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center text-center px-4 hero-fade-in mt-10 pointer-events-none">
-        {/*
-          Make sure container is pointer-events-none so we don't block full-screen mouse
-          movements on the 3D scene, but we re-enable pointer-events for buttons so they are clickable.
-        */}
 
         {/* Badge */}
         <span
