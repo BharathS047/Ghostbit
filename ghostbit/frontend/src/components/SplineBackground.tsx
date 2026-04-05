@@ -82,12 +82,17 @@ export default function SplineBackground() {
         hideUnwanted(scene);
       }
 
-      // Disable post-processing noise/grain passes if present
+      // Disable the "Built with Spline" logo watermark overlay pass
       const renderer = splineApp._renderer;
-      if (renderer?.composer?.passes) {
-        for (const pass of renderer.composer.passes) {
+      if (renderer?.logoOverlayPass) {
+        renderer.logoOverlayPass.enabled = false;
+      }
+
+      // Disable post-processing noise/grain passes if present
+      if (renderer?.effectComposer?.passes) {
+        for (const pass of renderer.effectComposer.passes) {
           const pn = (pass.name || pass.constructor?.name || "").toLowerCase();
-          if (pn.includes("noise") || pn.includes("grain") || pn.includes("film")) {
+          if (pn.includes("noise") || pn.includes("grain") || pn.includes("film") || pn.includes("logo")) {
             pass.enabled = false;
           }
         }
@@ -97,7 +102,7 @@ export default function SplineBackground() {
       if (splineApp._composer?.passes) {
         for (const pass of splineApp._composer.passes) {
           const pn = (pass.name || pass.constructor?.name || "").toLowerCase();
-          if (pn.includes("noise") || pn.includes("grain") || pn.includes("film")) {
+          if (pn.includes("noise") || pn.includes("grain") || pn.includes("film") || pn.includes("logo")) {
             pass.enabled = false;
           }
         }
@@ -141,10 +146,19 @@ export default function SplineBackground() {
         scene="https://prod.spline.design/D71snLIIxZPtQbcp/scene.splinecode"
         onLoad={onLoad}
       />
-      {/* Hide Spline watermark via CSS */}
+      {/* Force canvas to fill container and hide any watermark elements */}
       <style jsx>{`
+        div :global(canvas) {
+          width: 100% !important;
+          height: 100% !important;
+          display: block !important;
+        }
         div :global(a[href*="spline"]) {
           display: none !important;
+        }
+        div :global(> div) {
+          width: 100% !important;
+          height: 100% !important;
         }
       `}</style>
     </div>
