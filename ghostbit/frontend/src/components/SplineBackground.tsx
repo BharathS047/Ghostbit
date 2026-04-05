@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useRef, useEffect } from "react";
 
 const Spline = dynamic(() => import("@splinetool/react-spline"), {
   ssr: false,
@@ -8,6 +9,39 @@ const Spline = dynamic(() => import("@splinetool/react-spline"), {
 });
 
 export default function SplineBackground() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Mute any audio produced by the Spline scene
+  useEffect(() => {
+    // Suspend AudioContext globally to kill any Spline-triggered sounds
+    const origCreate = window.AudioContext || (window as any).webkitAudioContext;
+    if (origCreate) {
+      const origProto = origCreate.prototype;
+      const origResume = origProto.resume;
+      origProto.resume = function () {
+        this.suspend();
+        return Promise.resolve();
+      };
+      return () => {
+        origProto.resume = origResume;
+      };
+    }
+  }, []);
+
+  // Also mute any <audio> or <video> elements Spline injects
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new MutationObserver(() => {
+      el.querySelectorAll("audio, video").forEach((media) => {
+        (media as HTMLMediaElement).muted = true;
+        (media as HTMLMediaElement).volume = 0;
+      });
+    });
+    observer.observe(el, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+
   function onLoad(splineApp: any) {
     function hideUnwanted(obj: any) {
       if (!obj) return;
