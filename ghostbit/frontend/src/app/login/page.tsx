@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import SplineBackground from "../../components/SplineBackground";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -97,9 +98,12 @@ function LoginForm() {
   return (
     <div
       className="flex items-center justify-center px-4"
-      style={{ minHeight: "100vh", background: "#0a0a0b" }}
+      style={{ minHeight: "100vh", background: "#0a0a0b", position: "relative", overflow: "hidden" }}
     >
-      <div className="w-full max-w-md">
+      {/* Spline 3D background */}
+      <SplineBackground />
+
+      <div className="w-full max-w-md" style={{ position: "relative", zIndex: 1 }}>
         {/* Logo */}
         <div className="flex items-center justify-center gap-2.5 mb-10">
           <div

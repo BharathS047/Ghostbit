@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, Suspense, lazy } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
 
 const TicTacToe = lazy(() => import("../../components/games/TicTacToe"));
 const SnakeGame = lazy(() => import("../../components/games/SnakeGame"));
@@ -11,33 +10,6 @@ const MemoryMatch = lazy(() => import("../../components/games/MemoryMatch"));
 const PixelRunner = lazy(() => import("../../components/games/PixelRunner"));
 
 import HeroSection from "../../components/HeroSection";
-
-const Spline = dynamic(() => import("@splinetool/react-spline"), {
-  ssr: false,
-  loading: () => (
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "transparent",
-      }}
-    >
-      <div
-        style={{
-          width: 40,
-          height: 40,
-          border: "3px solid rgba(99,102,241,0.15)",
-          borderTopColor: "#6366f1",
-          borderRadius: "50%",
-          animation: "spin 0.8s linear infinite",
-        }}
-      />
-    </div>
-  ),
-});
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -285,64 +257,15 @@ export default function PlayPage() {
 
           {/* Games view */}
           {view === "games" && (<>
-            {/* ── Spline 3D Hero ── */}
-            <div
-              className="portal-animate mb-8"
-              style={{
-                position: "relative",
-                width: "100%",
-                height: 420,
-                borderRadius: 20,
-                overflow: "hidden",
-                background: "linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,27,75,0.6))",
-                border: "1px solid rgba(99,102,241,0.12)",
-                boxShadow: "0 0 60px rgba(99,102,241,0.08), inset 0 1px 0 rgba(255,255,255,0.04)",
-              }}
-            >
-              {/* Spline scene */}
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  zIndex: 1,
-                }}
-              >
-                <Spline scene="https://prod.spline.design/D71snLIIxZPtQbcp/scene.splinecode" />
-              </div>
-
-              {/* Bottom gradient fade for readability */}
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  height: "50%",
-                  background: "linear-gradient(to top, rgba(3,7,18,0.9) 0%, transparent 100%)",
-                  zIndex: 2,
-                  pointerEvents: "none",
-                }}
-              />
-
-              {/* Overlay text */}
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  padding: "32px 32px 28px",
-                  zIndex: 3,
-                  pointerEvents: "none",
-                }}
-              >
+            {/* Hero banner */}
+            <div className="portal-hero mb-8 portal-animate">
+              <div className="relative z-10">
                 <div
-                  className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-3"
+                  className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-4"
                   style={{
                     background: "rgba(99,102,241,0.15)",
                     color: "#a5b4fc",
                     border: "1px solid rgba(99,102,241,0.25)",
-                    backdropFilter: "blur(8px)",
                   }}
                 >
                   NEW GAMES WEEKLY
@@ -351,12 +274,79 @@ export default function PlayPage() {
                   className="text-3xl sm:text-4xl font-black mb-2"
                   style={{ color: "#f1f5f9", lineHeight: 1.15 }}
                 >
-                  Play. Compete.{" "}
+                  Play. Compete. <br />
                   <span style={{ color: "#a5b4fc" }}>Level Up.</span>
                 </h1>
                 <p className="text-sm sm:text-base max-w-md" style={{ color: "#94a3b8" }}>
                   Free browser games you can jump into instantly. No downloads, no installs.
                 </p>
+              </div>
+
+              {/* Decorative grid on the right */}
+              <div
+                className="absolute top-0 right-0 hidden sm:block pointer-events-none"
+                style={{ width: "55%", height: "100%", zIndex: 2 }}
+              >
+                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style={{ position: "absolute", inset: 0 }}>
+                  <defs>
+                    <linearGradient id="heroGridFade" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="white" stopOpacity="0" />
+                      <stop offset="35%" stopColor="white" stopOpacity="0.6" />
+                      <stop offset="100%" stopColor="white" stopOpacity="0.3" />
+                    </linearGradient>
+                    <mask id="heroGridMask">
+                      <rect width="100%" height="100%" fill="url(#heroGridFade)" />
+                    </mask>
+                  </defs>
+                  <g mask="url(#heroGridMask)">
+                    {/* Vertical grid lines */}
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                      <line
+                        key={`v${i}`}
+                        x1={`${(i + 1) * 10}%`}
+                        y1="0"
+                        x2={`${(i + 1) * 10}%`}
+                        y2="100%"
+                        stroke="#6366f1"
+                        strokeOpacity="0.12"
+                        strokeWidth="1"
+                      />
+                    ))}
+                    {/* Horizontal grid lines */}
+                    {[0, 1, 2, 3].map((i) => (
+                      <line
+                        key={`h${i}`}
+                        x1="0"
+                        y1={`${(i + 1) * 20}%`}
+                        x2="100%"
+                        y2={`${(i + 1) * 20}%`}
+                        stroke="#6366f1"
+                        strokeOpacity="0.12"
+                        strokeWidth="1"
+                      />
+                    ))}
+                    {/* Intersection dots */}
+                    {[20, 40, 60, 80].flatMap((y) =>
+                      [20, 40, 60, 80].map((x) => (
+                        <circle
+                          key={`d${x}-${y}`}
+                          cx={`${x}%`}
+                          cy={`${y}%`}
+                          r="2"
+                          fill="#6366f1"
+                          fillOpacity="0.35"
+                        />
+                      ))
+                    )}
+                    {/* Accent node — larger glow */}
+                    <circle cx="60%" cy="40%" r="5" fill="#6366f1" fillOpacity="0.2" />
+                    <circle cx="60%" cy="40%" r="12" fill="none" stroke="#6366f1" strokeOpacity="0.08" strokeWidth="1" />
+                    {/* Crosshair */}
+                    <line x1="37%" y1="60%" x2="43%" y2="60%" stroke="#818cf8" strokeOpacity="0.25" strokeWidth="1" />
+                    <line x1="40%" y1="57%" x2="40%" y2="63%" stroke="#818cf8" strokeOpacity="0.25" strokeWidth="1" />
+                    <circle cx="40%" cy="60%" r="4" fill="none" stroke="#818cf8" strokeOpacity="0.15" strokeWidth="1" />
+                  </g>
+                </svg>
               </div>
             </div>
 
