@@ -21,6 +21,15 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Verification code state
+  const [showVerify, setShowVerify] = useState(false);
+  const [verifyEmail, setVerifyEmail] = useState("");
+  const [verifyCode, setVerifyCode] = useState("");
+  const [verifying, setVerifying] = useState(false);
+
+  // Resend state
   const [showResend, setShowResend] = useState(false);
   const [resendEmail, setResendEmail] = useState("");
   const [resending, setResending] = useState(false);
@@ -47,6 +56,7 @@ function LoginForm() {
     setError("");
     setSuccess("");
     setShowResend(false);
+    setShowVerify(false);
     setSubmitting(true);
     try {
       if (mode === "login") {
@@ -54,6 +64,9 @@ function LoginForm() {
       } else {
         const msg = await signup(username, password, email);
         setSuccess(msg);
+        // Show verification code input after signup
+        setVerifyEmail(email);
+        setShowVerify(true);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Something went wrong";
@@ -66,19 +79,46 @@ function LoginForm() {
     }
   }
 
+  async function handleVerifyCode(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setVerifying(true);
+    try {
+      const res = await fetch(`${API}/auth/verify-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: verifyEmail, code: verifyCode }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Verification failed");
+      setSuccess("Email verified! You can now sign in.");
+      setShowVerify(false);
+      setMode("login");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Verification failed");
+    } finally {
+      setVerifying(false);
+    }
+  }
+
   async function handleResend() {
-    if (!resendEmail) return;
+    const emailToResend = resendEmail || verifyEmail;
+    if (!emailToResend) return;
     setResending(true);
     setError("");
     try {
       const res = await fetch(`${API}/auth/resend-verification`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: resendEmail }),
+        body: JSON.stringify({ email: emailToResend }),
       });
       const data = await res.json();
-      setSuccess(data.message || "Verification email sent. Check your inbox.");
+      setSuccess(data.message || "New verification code sent. Check your inbox.");
       setShowResend(false);
+      if (!showVerify) {
+        setVerifyEmail(emailToResend);
+        setShowVerify(true);
+      }
     } catch {
       setError("Failed to resend. Please try again.");
     } finally {
@@ -94,6 +134,14 @@ function LoginForm() {
     color: "#ececed",
     outline: "none",
   };
+
+  // Extract dev code from success message if present
+  const devCode = success.includes("[DEV CODE]")
+    ? success.split("[DEV CODE]")[1]?.trim()
+    : null;
+  const displaySuccess = success.includes("[DEV CODE]")
+    ? success.split("[DEV CODE]")[0].trim()
+    : success;
 
   return (
     <div
@@ -143,6 +191,8 @@ function LoginForm() {
                   setMode(m);
                   setError("");
                   setSuccess("");
+                  setShowVerify(false);
+                  setShowResend(false);
                 }}
                 className="flex-1 py-2.5 text-sm font-medium transition-all"
                 style={{
@@ -160,8 +210,8 @@ function LoginForm() {
             ))}
           </div>
 
-          {/* Success message (e.g. after signup) */}
-          {success && (
+          {/* Success message */}
+          {displaySuccess && (
             <div
               className="flex items-start gap-2.5 text-xs font-mono px-4 py-3 rounded-lg mb-5"
               style={{
@@ -183,172 +233,237 @@ function LoginForm() {
                 <path d="M22 4 12 14.01l-3-3" />
               </svg>
               <span>
-                {success.includes("[DEV MODE]") ? (
+                {displaySuccess}
+                {devCode && (
                   <>
-                    {success.split("[DEV MODE]")[0]}
                     <br />
                     <span style={{ color: "#818cf8", fontSize: "10px" }}>
-                      [DEV MODE]{" "}
-                      <a
-                        href={success.split("Verify here: ")[1]?.trim()}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: "#a5b4fc", textDecoration: "underline" }}
-                      >
-                        Click here to verify
-                      </a>
+                      [DEV] Code: <strong>{devCode}</strong>
                     </span>
                   </>
-                ) : (
-                  success
                 )}
               </span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label
-                className="block text-xs font-mono uppercase tracking-wider mb-2"
-                style={{ color: "#475569" }}
-              >
-                Username
-              </label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                minLength={3}
-                maxLength={32}
-                className="w-full px-4 py-3 rounded-lg text-sm font-mono transition-colors"
-                style={inputStyle}
-                placeholder="Enter username"
-              />
-            </div>
-
-            {/* Email field — signup only */}
-            {mode === "signup" && (
-              <div>
-                <label
-                  className="block text-xs font-mono uppercase tracking-wider mb-2"
-                  style={{ color: "#475569" }}
-                >
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 rounded-lg text-sm font-mono transition-colors"
-                  style={inputStyle}
-                  placeholder="Enter email"
-                />
-              </div>
-            )}
-
-            <div>
-              <label
-                className="block text-xs font-mono uppercase tracking-wider mb-2"
-                style={{ color: "#475569" }}
-              >
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                className="w-full px-4 py-3 rounded-lg text-sm font-mono transition-colors"
-                style={inputStyle}
-                placeholder="Enter password"
-              />
-            </div>
-
-            {/* Forgot password — login only */}
-            {mode === "login" && (
-              <div className="text-right">
-                <Link
-                  href="/forgot-password"
-                  className="text-xs transition-colors"
-                  style={{ color: "#6366f1" }}
-                >
-                  Forgot password?
-                </Link>
-              </div>
-            )}
-
-            {error && (
-              <p
-                className="text-xs font-mono px-3 py-2 rounded-lg"
-                style={{
-                  color: "#f87171",
-                  background: "rgba(248,113,113,0.08)",
-                  border: "1px solid rgba(248,113,113,0.2)",
-                }}
-              >
-                {error}
+          {/* Verification code entry */}
+          {showVerify ? (
+            <form onSubmit={handleVerifyCode} className="space-y-5">
+              <p className="text-xs" style={{ color: "#94a3b8" }}>
+                Enter the 6-digit code sent to <strong style={{ color: "#ececed" }}>{verifyEmail}</strong>
               </p>
-            )}
+              <div>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={verifyCode}
+                  onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, ""))}
+                  required
+                  className="w-full px-4 py-4 rounded-lg text-2xl font-mono tracking-[0.5em] text-center transition-colors"
+                  style={inputStyle}
+                  placeholder="000000"
+                  autoFocus
+                />
+              </div>
 
-            {/* Resend verification email */}
-            {showResend && (
-              <div
-                className="rounded-md px-4 py-3 space-y-3"
+              {error && (
+                <p
+                  className="text-xs font-mono px-3 py-2 rounded-lg"
+                  style={{
+                    color: "#f87171",
+                    background: "rgba(248,113,113,0.08)",
+                    border: "1px solid rgba(248,113,113,0.2)",
+                  }}
+                >
+                  {error}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={verifying || verifyCode.length !== 6}
+                className="w-full py-3 text-sm font-semibold rounded-lg transition-all"
                 style={{
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.06)",
+                  background: "#6366f1",
+                  color: "#fff",
+                  opacity: verifying || verifyCode.length !== 6 ? 0.4 : 1,
+                  cursor: verifying || verifyCode.length !== 6 ? "not-allowed" : "pointer",
                 }}
               >
-                <p className="text-xs" style={{ color: "#94a3b8" }}>
-                  Enter your email to resend the verification link:
-                </p>
-                <input
-                  type="email"
-                  value={resendEmail}
-                  onChange={(e) => setResendEmail(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg text-sm font-mono"
-                  style={inputStyle}
-                  placeholder="Your email address"
-                />
+                {verifying ? "Verifying..." : "Verify Email"}
+              </button>
+
+              <div className="text-center">
                 <button
                   type="button"
                   onClick={handleResend}
-                  disabled={resending || !resendEmail}
-                  className="w-full py-2 text-xs font-medium rounded-md transition-all"
-                  style={{
-                    background: "rgba(255,255,255,0.06)",
-                    color: "#ececed",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    opacity: resending || !resendEmail ? 0.4 : 1,
-                    cursor: resending || !resendEmail ? "not-allowed" : "pointer",
-                  }}
+                  disabled={resending}
+                  className="text-xs transition-colors"
+                  style={{ color: "#6366f1", background: "none", border: "none", cursor: "pointer" }}
                 >
-                  {resending ? "Sending..." : "Resend Verification Email"}
+                  {resending ? "Sending..." : "Resend code"}
                 </button>
               </div>
-            )}
+            </form>
+          ) : (
+            <>
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <label
+                    className="block text-xs font-mono uppercase tracking-wider mb-2"
+                    style={{ color: "#475569" }}
+                  >
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                    minLength={3}
+                    maxLength={32}
+                    className="w-full px-4 py-3 rounded-lg text-sm font-mono transition-colors"
+                    style={inputStyle}
+                    placeholder="Enter username"
+                  />
+                </div>
 
-            <button
-              type="submit"
-              disabled={submitting || !!success}
-              className="w-full py-3 text-sm font-semibold rounded-lg transition-all"
-              style={{
-                background: "#6366f1",
-                color: "#fff",
-                opacity: submitting || success ? 0.4 : 1,
-                cursor: submitting || success ? "not-allowed" : "pointer",
-              }}
-            >
-              {submitting
-                ? "Processing..."
-                : mode === "login"
-                ? "Sign In"
-                : "Create Account"}
-            </button>
-          </form>
+                {/* Email field — signup only */}
+                {mode === "signup" && (
+                  <div>
+                    <label
+                      className="block text-xs font-mono uppercase tracking-wider mb-2"
+                      style={{ color: "#475569" }}
+                    >
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="w-full px-4 py-3 rounded-lg text-sm font-mono transition-colors"
+                      style={inputStyle}
+                      placeholder="Enter email"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label
+                    className="block text-xs font-mono uppercase tracking-wider mb-2"
+                    style={{ color: "#475569" }}
+                  >
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={6}
+                      className="w-full px-4 py-3 pr-11 rounded-lg text-sm font-mono transition-colors"
+                      style={inputStyle}
+                      placeholder="Enter password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-lg leading-none select-none transition-transform hover:scale-110"
+                      style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? "🐵" : "🙈"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Forgot password — login only */}
+                {mode === "login" && (
+                  <div className="text-right">
+                    <Link
+                      href="/forgot-password"
+                      className="text-xs transition-colors"
+                      style={{ color: "#6366f1" }}
+                    >
+                      Forgot password?
+                    </Link>
+                  </div>
+                )}
+
+                {error && (
+                  <p
+                    className="text-xs font-mono px-3 py-2 rounded-lg"
+                    style={{
+                      color: "#f87171",
+                      background: "rgba(248,113,113,0.08)",
+                      border: "1px solid rgba(248,113,113,0.2)",
+                    }}
+                  >
+                    {error}
+                  </p>
+                )}
+
+                {/* Resend verification code */}
+                {showResend && (
+                  <div
+                    className="rounded-md px-4 py-3 space-y-3"
+                    style={{
+                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid rgba(255,255,255,0.06)",
+                    }}
+                  >
+                    <p className="text-xs" style={{ color: "#94a3b8" }}>
+                      Enter your email to resend the verification code:
+                    </p>
+                    <input
+                      type="email"
+                      value={resendEmail}
+                      onChange={(e) => setResendEmail(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg text-sm font-mono"
+                      style={inputStyle}
+                      placeholder="Your email address"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleResend}
+                      disabled={resending || !resendEmail}
+                      className="w-full py-2 text-xs font-medium rounded-md transition-all"
+                      style={{
+                        background: "rgba(255,255,255,0.06)",
+                        color: "#ececed",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        opacity: resending || !resendEmail ? 0.4 : 1,
+                        cursor: resending || !resendEmail ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      {resending ? "Sending..." : "Resend Verification Code"}
+                    </button>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={submitting || !!showVerify}
+                  className="w-full py-3 text-sm font-semibold rounded-lg transition-all"
+                  style={{
+                    background: "#6366f1",
+                    color: "#fff",
+                    opacity: submitting ? 0.4 : 1,
+                    cursor: submitting ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {submitting
+                    ? "Processing..."
+                    : mode === "login"
+                    ? "Sign In"
+                    : "Create Account"}
+                </button>
+              </form>
+            </>
+          )}
         </div>
 
         <p

@@ -1,6 +1,6 @@
 """
 GhostBit Email Service
-Sends verification and password-reset emails via Azure Communication Services.
+Sends verification and password-reset codes via Azure Communication Services.
 """
 
 import os
@@ -56,58 +56,56 @@ def _send_email(to_email: str, subject: str, html_body: str) -> bool:
 # Public helpers
 # ---------------------------------------------------------------------------
 
-def send_verification_email(to_email: str, token: str) -> bool:
-    link = f"{FRONTEND_URL}/verify?token={token}"
-    subject = "Verify your GhostPlay account"
+def send_verification_code(to_email: str, code: str) -> bool:
+    subject = "Your GhostPlay verification code"
     html = f"""
     <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px;
                 background:#0f172a;color:#e2e8f0;border-radius:12px;">
       <h2 style="color:#a5b4fc;margin-bottom:8px;">Welcome to GhostPlay!</h2>
       <p style="color:#94a3b8;font-size:14px;line-height:1.6;">
-        Click the button below to verify your email address and activate your account.
+        Use the code below to verify your email address and activate your account.
       </p>
-      <a href="{link}"
-         style="display:inline-block;margin:24px 0;padding:12px 28px;
-                background:linear-gradient(135deg,#6366f1,#4f46e5);
-                color:#fff;text-decoration:none;border-radius:10px;
-                font-weight:600;font-size:14px;">
-        Verify Email
-      </a>
-      <p style="color:#475569;font-size:12px;">
-        Or copy this link: <br/>
-        <span style="color:#94a3b8;word-break:break-all;">{link}</span>
+      <div style="margin:24px 0;text-align:center;">
+        <span style="display:inline-block;padding:16px 32px;
+                     background:linear-gradient(135deg,#6366f1,#4f46e5);
+                     color:#fff;font-size:32px;font-weight:800;letter-spacing:8px;
+                     border-radius:12px;font-family:monospace;">
+          {code}
+        </span>
+      </div>
+      <p style="color:#475569;font-size:12px;text-align:center;">
+        This code expires in 30 minutes.
       </p>
       <p style="color:#334155;font-size:11px;margin-top:24px;">
-        This link expires in 30 minutes. If you didn't create an account, ignore this email.
+        If you didn't create an account, ignore this email.
       </p>
     </div>
     """
     return _send_email(to_email, subject, html)
 
 
-def send_password_reset_email(to_email: str, token: str) -> bool:
-    link = f"{FRONTEND_URL}/reset-password?token={token}"
-    subject = "Reset your GhostPlay password"
+def send_password_reset_code(to_email: str, code: str) -> bool:
+    subject = "Your GhostPlay password reset code"
     html = f"""
     <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px;
                 background:#0f172a;color:#e2e8f0;border-radius:12px;">
       <h2 style="color:#a5b4fc;margin-bottom:8px;">Password Reset</h2>
       <p style="color:#94a3b8;font-size:14px;line-height:1.6;">
-        We received a request to reset your password. Click the button below to set a new one.
+        We received a request to reset your password. Use the code below to set a new one.
       </p>
-      <a href="{link}"
-         style="display:inline-block;margin:24px 0;padding:12px 28px;
-                background:linear-gradient(135deg,#6366f1,#4f46e5);
-                color:#fff;text-decoration:none;border-radius:10px;
-                font-weight:600;font-size:14px;">
-        Reset Password
-      </a>
-      <p style="color:#475569;font-size:12px;">
-        Or copy this link: <br/>
-        <span style="color:#94a3b8;word-break:break-all;">{link}</span>
+      <div style="margin:24px 0;text-align:center;">
+        <span style="display:inline-block;padding:16px 32px;
+                     background:linear-gradient(135deg,#6366f1,#4f46e5);
+                     color:#fff;font-size:32px;font-weight:800;letter-spacing:8px;
+                     border-radius:12px;font-family:monospace;">
+          {code}
+        </span>
+      </div>
+      <p style="color:#475569;font-size:12px;text-align:center;">
+        This code expires in 15 minutes.
       </p>
       <p style="color:#334155;font-size:11px;margin-top:24px;">
-        This link expires in 15 minutes. If you didn't request a reset, ignore this email.
+        If you didn't request a reset, ignore this email.
       </p>
     </div>
     """

@@ -1,11 +1,12 @@
 """
 GhostBit Auth Routes
-POST /auth/signup, /auth/login, GET /auth/me
+POST /auth/signup, /auth/login, /auth/verify-email
 POST /auth/forgot-password, /auth/reset-password
-GET  /auth/verify-email
+GET  /auth/me
 """
 
 import secrets
+import random
 from datetime import datetime, timezone, timedelta
 
 from fastapi import APIRouter, HTTPException, Depends
@@ -18,12 +19,12 @@ from .auth import (
     create_access_token,
     get_current_user,
 )
-from .services.email_service import send_verification_email, send_password_reset_email, is_dev_mode, FRONTEND_URL
+from .services.email_service import send_verification_code, send_password_reset_code, is_dev_mode
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-VERIFY_TOKEN_EXPIRE_MINUTES = 30
-RESET_TOKEN_EXPIRE_MINUTES = 15
+VERIFY_CODE_EXPIRE_MINUTES = 30
+RESET_CODE_EXPIRE_MINUTES = 15
 
 
 # ---------------------------------------------------------------------------
@@ -41,6 +42,11 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class VerifyEmailRequest(BaseModel):
+    email: EmailStr
+    code: str = Field(min_length=6, max_length=6)
+
+
 class ResendVerificationRequest(BaseModel):
     email: EmailStr
 
@@ -50,7 +56,8 @@ class ForgotPasswordRequest(BaseModel):
 
 
 class ResetPasswordRequest(BaseModel):
-    token: str
+    email: EmailStr
+    code: str = Field(min_length=6, max_length=6)
     new_password: str = Field(min_length=6, max_length=128)
 
 
@@ -76,15 +83,15 @@ class UserResponse(BaseModel):
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _generate_token() -> str:
-    return secrets.token_urlsafe(32)
+def _generate_code() -> str:
+    return f"{random.randint(0, 999999):06d}"
 
 
-def _token_expiry(minutes: int) -> str:
+def _code_expiry(minutes: int) -> str:
     return (datetime.now(timezone.utc) + timedelta(minutes=minutes)).isoformat()
 
 
-def _is_token_expired(expiry_str: str | None) -> bool:
+def _is_code_expired(expiry_str: str | None) -> bool:
     if not expiry_str:
         return True
     try:
@@ -100,16 +107,16 @@ def _is_token_expired(expiry_str: str | None) -> bool:
 
 @router.post("/signup", response_model=MessageResponse)
 def signup(body: SignupRequest):
-    verification_token = _generate_token()
-    token_expiry = _token_expiry(VERIFY_TOKEN_EXPIRE_MINUTES)
+    verification_code = _generate_code()
+    code_expiry = _code_expiry(VERIFY_CODE_EXPIRE_MINUTES)
 
     try:
         user = db.create_user(
             username=body.username,
             hashed_password=hash_password(body.password),
             email=body.email,
-            verification_token=verification_token,
-            token_expiry=token_expiry,
+            verification_token=verification_code,
+            token_expiry=code_expiry,
         )
     except ValueError as e:
         detail = str(e)
@@ -117,13 +124,11 @@ def signup(body: SignupRequest):
             raise HTTPException(status_code=409, detail="Email already registered")
         raise HTTPException(status_code=409, detail="Username already exists")
 
-    # Send verification email
-    send_verification_email(body.email, verification_token)
+    send_verification_code(body.email, verification_code)
 
-    msg = "Account created. Please check your email to verify your account."
+    msg = "Account created. Please enter the 6-digit code sent to your email."
     if is_dev_mode():
-        verify_link = f"{FRONTEND_URL}/verify?token={verification_token}"
-        msg += f" [DEV MODE] Verify here: {verify_link}"
+        msg += f" [DEV CODE] {verification_code}"
 
     return MessageResponse(message=msg)
 
@@ -132,14 +137,14 @@ def signup(body: SignupRequest):
 # Email verification
 # ---------------------------------------------------------------------------
 
-@router.get("/verify-email", response_model=MessageResponse)
-def verify_email(token: str):
-    user = db.get_user_by_verification_token(token)
-    if not user:
-        raise HTTPException(status_code=400, detail="Invalid verification token")
+@router.post("/verify-email", response_model=MessageResponse)
+def verify_email(body: VerifyEmailRequest):
+    user = db.get_user_by_email(body.email)
+    if not user or user.get("verification_token") != body.code:
+        raise HTTPException(status_code=400, detail="Invalid verification code")
 
-    if _is_token_expired(user.get("token_expiry")):
-        raise HTTPException(status_code=400, detail="Verification token has expired")
+    if _is_code_expired(user.get("token_expiry")):
+        raise HTTPException(status_code=400, detail="Verification code has expired. Please request a new one.")
 
     db.verify_user_email(user["id"])
     return MessageResponse(message="Email verified successfully. You can now log in.")
@@ -151,21 +156,20 @@ def verify_email(token: str):
 
 @router.post("/resend-verification", response_model=MessageResponse)
 def resend_verification(body: ResendVerificationRequest):
-    generic_msg = "If an unverified account with that email exists, a new verification link has been sent."
+    generic_msg = "If an unverified account with that email exists, a new verification code has been sent."
 
     user = db.get_user_by_email(body.email)
     if not user or user.get("is_verified"):
         return MessageResponse(message=generic_msg)
 
-    new_token = _generate_token()
-    new_expiry = _token_expiry(VERIFY_TOKEN_EXPIRE_MINUTES)
-    db.set_verification_token(user["id"], new_token, new_expiry)
+    new_code = _generate_code()
+    new_expiry = _code_expiry(VERIFY_CODE_EXPIRE_MINUTES)
+    db.set_verification_token(user["id"], new_code, new_expiry)
 
-    send_verification_email(body.email, new_token)
+    send_verification_code(body.email, new_code)
 
     if is_dev_mode():
-        verify_link = f"{FRONTEND_URL}/verify?token={new_token}"
-        return MessageResponse(message=f"{generic_msg} [DEV MODE] Verify here: {verify_link}")
+        return MessageResponse(message=f"{generic_msg} [DEV CODE] {new_code}")
 
     return MessageResponse(message=generic_msg)
 
@@ -195,18 +199,21 @@ def login(body: LoginRequest):
 
 @router.post("/forgot-password", response_model=MessageResponse)
 def forgot_password(body: ForgotPasswordRequest):
-    # Always return same message to prevent email enumeration
-    generic_msg = "If an account with that email exists, a reset link has been sent."
+    generic_msg = "If an account with that email exists, a 6-digit reset code has been sent."
 
     user = db.get_user_by_email(body.email)
     if not user:
         return MessageResponse(message=generic_msg)
 
-    reset_token = _generate_token()
-    expiry = _token_expiry(RESET_TOKEN_EXPIRE_MINUTES)
-    db.set_reset_token(user["id"], reset_token, expiry)
+    reset_code = _generate_code()
+    expiry = _code_expiry(RESET_CODE_EXPIRE_MINUTES)
+    db.set_reset_token(user["id"], reset_code, expiry)
 
-    send_password_reset_email(body.email, reset_token)
+    send_password_reset_code(body.email, reset_code)
+
+    if is_dev_mode():
+        return MessageResponse(message=f"{generic_msg} [DEV CODE] {reset_code}")
+
     return MessageResponse(message=generic_msg)
 
 
@@ -216,12 +223,12 @@ def forgot_password(body: ForgotPasswordRequest):
 
 @router.post("/reset-password", response_model=MessageResponse)
 def reset_password(body: ResetPasswordRequest):
-    user = db.get_user_by_reset_token(body.token)
-    if not user:
-        raise HTTPException(status_code=400, detail="Invalid reset token")
+    user = db.get_user_by_email(body.email)
+    if not user or user.get("reset_token") != body.code:
+        raise HTTPException(status_code=400, detail="Invalid reset code")
 
-    if _is_token_expired(user.get("token_expiry")):
-        raise HTTPException(status_code=400, detail="Reset token has expired")
+    if _is_code_expired(user.get("token_expiry")):
+        raise HTTPException(status_code=400, detail="Reset code has expired. Please request a new one.")
 
     db.update_user_password(user["id"], hash_password(body.new_password))
     return MessageResponse(message="Password reset successfully. You can now log in.")

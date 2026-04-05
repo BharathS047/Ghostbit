@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -8,33 +8,42 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 function VerifyContent() {
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [email, setEmail] = useState(searchParams.get("email") || "");
+  const [code, setCode] = useState("");
+  const [status, setStatus] = useState<"form" | "loading" | "success" | "error">("form");
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    if (!token) {
-      setStatus("error");
-      setMessage("No verification token provided.");
-      return;
-    }
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setStatus("loading");
+    setMessage("");
 
-    fetch(`${API}/auth/verify-email?token=${encodeURIComponent(token)}`)
-      .then(async (res) => {
-        const data = await res.json();
-        if (res.ok) {
-          setStatus("success");
-          setMessage(data.message);
-        } else {
-          setStatus("error");
-          setMessage(data.detail || "Verification failed.");
-        }
-      })
-      .catch(() => {
-        setStatus("error");
-        setMessage("Network error. Please try again.");
+    try {
+      const res = await fetch(`${API}/auth/verify-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code }),
       });
-  }, [token]);
+      const data = await res.json();
+      if (res.ok) {
+        setStatus("success");
+        setMessage(data.message);
+      } else {
+        setStatus("error");
+        setMessage(data.detail || "Verification failed.");
+      }
+    } catch {
+      setStatus("error");
+      setMessage("Network error. Please try again.");
+    }
+  }
+
+  const inputStyle = {
+    background: "rgba(0,0,0,0.3)",
+    border: "1px solid rgba(255,255,255,0.06)",
+    color: "#ececed",
+    outline: "none",
+  };
 
   const icon =
     status === "success" ? (
@@ -89,10 +98,10 @@ function VerifyContent() {
                 style={{ borderColor: "#6366f1", borderTopColor: "transparent" }}
               />
               <p className="text-sm" style={{ color: "#8b8b8e" }}>
-                Verifying your email...
+                Verifying...
               </p>
             </div>
-          ) : (
+          ) : status === "success" || status === "error" ? (
             <div className="flex flex-col items-center gap-4 py-4 text-center">
               {icon}
               <h2
@@ -104,6 +113,15 @@ function VerifyContent() {
               <p className="text-sm" style={{ color: "#8b8b8e" }}>
                 {message}
               </p>
+              {status === "error" && (
+                <button
+                  onClick={() => { setStatus("form"); setMessage(""); setCode(""); }}
+                  className="mt-2 inline-block px-6 py-2.5 rounded-lg text-sm font-medium transition-all"
+                  style={{ background: "rgba(255,255,255,0.06)", color: "#ececed", border: "1px solid rgba(255,255,255,0.1)" }}
+                >
+                  Try Again
+                </button>
+              )}
               <Link
                 href="/login"
                 className="mt-2 inline-block px-6 py-2.5 rounded-lg text-sm font-medium transition-all"
@@ -112,6 +130,79 @@ function VerifyContent() {
                 Go to Login
               </Link>
             </div>
+          ) : (
+            <>
+              <h2 className="text-lg font-semibold mb-1" style={{ color: "#ececed" }}>
+                Verify Your Email
+              </h2>
+              <p className="text-xs mb-6" style={{ color: "#52525b" }}>
+                Enter your email and the 6-digit code we sent you.
+              </p>
+
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <label
+                    className="block text-xs font-mono uppercase tracking-wider mb-2"
+                    style={{ color: "#52525b" }}
+                  >
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 rounded-lg text-sm font-mono transition-colors"
+                    style={inputStyle}
+                    placeholder="Enter your email"
+                  />
+                </div>
+                <div>
+                  <label
+                    className="block text-xs font-mono uppercase tracking-wider mb-2"
+                    style={{ color: "#52525b" }}
+                  >
+                    Verification Code
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+                    required
+                    className="w-full px-4 py-4 rounded-lg text-2xl font-mono tracking-[0.5em] text-center transition-colors"
+                    style={inputStyle}
+                    placeholder="000000"
+                    autoFocus
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={code.length !== 6 || !email}
+                  className="w-full py-3 text-sm font-semibold rounded-lg transition-all"
+                  style={{
+                    background: "#6366f1",
+                    color: "#fff",
+                    opacity: code.length !== 6 || !email ? 0.4 : 1,
+                    cursor: code.length !== 6 || !email ? "not-allowed" : "pointer",
+                  }}
+                >
+                  Verify Email
+                </button>
+
+                <div className="text-center">
+                  <Link
+                    href="/login"
+                    className="text-xs transition-colors"
+                    style={{ color: "#6366f1" }}
+                  >
+                    Back to Login
+                  </Link>
+                </div>
+              </form>
+            </>
           )}
         </div>
 
