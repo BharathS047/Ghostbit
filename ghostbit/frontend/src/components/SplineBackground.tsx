@@ -28,14 +28,22 @@ export default function SplineBackground() {
     }
   }, []);
 
-  // Also mute any <audio> or <video> elements Spline injects
+  // Mute any <audio>/<video> elements AND hide the "Made with Spline" watermark
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const observer = new MutationObserver(() => {
+      // Mute media
       el.querySelectorAll("audio, video").forEach((media) => {
         (media as HTMLMediaElement).muted = true;
         (media as HTMLMediaElement).volume = 0;
+      });
+      // Hide "Made with Spline" watermark logo
+      el.querySelectorAll("a, div, img").forEach((node) => {
+        const anchor = node.closest("a");
+        if (anchor && anchor.href && anchor.href.includes("spline")) {
+          (anchor as HTMLElement).style.display = "none";
+        }
       });
     });
     observer.observe(el, { childList: true, subtree: true });
@@ -118,18 +126,27 @@ export default function SplineBackground() {
 
   return (
     <div
+      ref={containerRef}
       style={{
         position: "absolute",
         inset: 0,
         zIndex: 0,
         width: "100%",
         height: "100%",
+        overflow: "hidden",
       }}
     >
       <Spline
+        style={{ width: "100%", height: "100%" }}
         scene="https://prod.spline.design/D71snLIIxZPtQbcp/scene.splinecode"
         onLoad={onLoad}
       />
+      {/* Hide Spline watermark via CSS */}
+      <style jsx>{`
+        div :global(a[href*="spline"]) {
+          display: none !important;
+        }
+      `}</style>
     </div>
   );
 }
