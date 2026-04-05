@@ -82,7 +82,7 @@ export default function KeyGenerator() {
                 </button>
               </div>
             </div>
-            <div className="glass-input p-4 font-mono text-xs h-56 overflow-y-auto word-break" style={{ color: "#f87171", borderColor: "rgba(185,28,28,0.15)" }}>
+            <div className="glass-input p-4 font-mono text-xs h-40 sm:h-56 overflow-y-auto word-break" style={{ color: "#f87171", borderColor: "rgba(185,28,28,0.15)" }}>
               {keys.private}
             </div>
           </div>
@@ -100,7 +100,7 @@ export default function KeyGenerator() {
                 </button>
               </div>
             </div>
-            <div className="glass-input p-4 font-mono text-xs h-56 overflow-y-auto word-break" style={{ color: "#fca5a5", borderColor: "rgba(239,68,68,0.15)" }}>
+            <div className="glass-input p-4 font-mono text-xs h-40 sm:h-56 overflow-y-auto word-break" style={{ color: "#fca5a5", borderColor: "rgba(239,68,68,0.15)" }}>
               {keys.public}
             </div>
           </div>

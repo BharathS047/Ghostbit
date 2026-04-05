@@ -112,12 +112,12 @@ export default function MemoryMatch({ onScore }: Props) {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-4 gap-3" style={{ width: "fit-content" }}>
+      <div className="grid grid-cols-4 gap-2 sm:gap-3" style={{ width: "fit-content" }}>
         {cards.map((card, i) => (
           <button
             key={card.id}
             onClick={() => handleClick(i)}
-            className="w-20 h-20 rounded-xl text-2xl flex items-center justify-center transition-all"
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl text-xl sm:text-2xl flex items-center justify-center transition-all"
             style={{
               background: card.matched
                 ? "rgba(34,197,94,0.12)"

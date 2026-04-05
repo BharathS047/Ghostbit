@@ -185,14 +185,14 @@ export default function PlayPage() {
             </span>
           </div>
 
-          <div className="hidden sm:flex items-center gap-1">
+          <div className="flex items-center gap-1">
             {(["Games", "Leaderboard"] as const).map((item) => {
               const isActive = (item === "Games" && view === "games") || (item === "Leaderboard" && view === "leaderboard");
               return (
                 <button
                   key={item}
                   onClick={() => setView(item === "Games" ? "games" : "leaderboard")}
-                  className="px-3 py-1.5 text-sm rounded-lg transition-colors"
+                  className="px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm rounded-lg transition-colors"
                   style={{
                     color: isActive ? "#a5b4fc" : "#64748b",
                     background: isActive ? "rgba(99,102,241,0.08)" : "transparent",
@@ -207,14 +207,14 @@ export default function PlayPage() {
           <div className="flex items-center gap-3">
             {user ? (
               <>
-                <div className="hidden sm:flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <div
                     className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
                     style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "#fff" }}
                   >
                     {user.username[0].toUpperCase()}
                   </div>
-                  <span className="text-xs font-mono" style={{ color: "#94a3b8" }}>
+                  <span className="hidden sm:inline text-xs font-mono" style={{ color: "#94a3b8" }}>
                     {user.username}
                   </span>
                 </div>
@@ -589,7 +589,8 @@ function GameOverlay({
         </Suspense>
       </div>
       <p className="text-xs font-mono pb-4" style={{ color: "#334155" }}>
-        Press ESC to close
+        <span className="hidden sm:inline">Press ESC to close</span>
+        <span className="sm:hidden">Tap X to close</span>
       </p>
     </div>
   );
@@ -636,7 +637,7 @@ function LeaderboardView({ token }: { token: string | null }) {
         <p className="section-label mb-3" style={{ color: "#64748b", fontSize: "11px", letterSpacing: "0.08em", fontFamily: "monospace", textTransform: "uppercase" }}>
           GhostPlay / Leaderboard
         </p>
-        <h1 className="text-3xl md:text-4xl font-black mb-2" style={{ color: "#e2e8f0" }}>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-black mb-2" style={{ color: "#e2e8f0" }}>
           Leaderboard
         </h1>
         <p style={{ color: "#64748b", fontSize: "14px" }}>
@@ -653,7 +654,7 @@ function LeaderboardView({ token }: { token: string | null }) {
             <button
               key={g}
               onClick={() => setGame(g)}
-              className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-all"
+              className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all"
               style={{
                 background: active ? "rgba(99,102,241,0.15)" : "rgba(255,255,255,0.03)",
                 color: active ? "#a5b4fc" : "#475569",

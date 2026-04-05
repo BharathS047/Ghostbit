@@ -76,13 +76,13 @@ function AdminDashboard() {
               ADMIN
             </span>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="hidden sm:inline text-xs font-mono" style={{ color: "var(--text-muted)" }}>
               {user?.username}
             </span>
             <button
               onClick={logout}
-              className="text-xs font-mono px-3 py-1.5 rounded-md"
+              className="text-xs font-mono px-2 sm:px-3 py-1.5 rounded-md"
               style={{ color: "var(--text-secondary)", border: "1px solid var(--border-subtle)" }}
             >
               Logout
@@ -101,7 +101,7 @@ function AdminDashboard() {
           {/* Page title */}
           <div className="mb-8">
             <p className="section-label mb-3">GhostBit / Admin</p>
-            <h1 className="text-3xl md:text-4xl font-black mb-2" style={{ color: "#ef4444" }}>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black mb-2" style={{ color: "#ef4444" }}>
               Control Panel
             </h1>
             <p style={{ color: "var(--text-secondary)" }}>
@@ -159,65 +159,116 @@ function UsersTable({
   };
 
   return (
-    <div className="glass-card overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-              <th className="text-left px-6 py-4 font-mono text-xs uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>ID</th>
-              <th className="text-left px-6 py-4 font-mono text-xs uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Username</th>
-              <th className="text-left px-6 py-4 font-mono text-xs uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Role</th>
-              <th className="text-left px-6 py-4 font-mono text-xs uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Created</th>
-              <th className="text-left px-6 py-4 font-mono text-xs uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((u) => (
-              <tr key={u.id} style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-                <td className="px-6 py-4 font-mono" style={{ color: "var(--text-muted)" }}>#{u.id}</td>
-                <td className="px-6 py-4 font-semibold" style={{ color: "var(--text-primary)" }}>{u.username}</td>
-                <td className="px-6 py-4">
-                  <RoleBadge role={u.role} />
-                </td>
-                <td className="px-6 py-4 font-mono text-xs" style={{ color: "var(--text-muted)" }}>
-                  {new Date(u.created_at).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4">
-                  {u.id === currentUserId ? (
-                    <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
-                      (you)
-                    </span>
-                  ) : (
-                    <div className="flex gap-2">
-                      {roles
-                        .filter((r) => r !== u.role)
-                        .map((r) => {
-                          const s = roleButtonStyle[r];
-                          return (
-                            <button
-                              key={r}
-                              onClick={() => onChangeRole(u.id, r)}
-                              className="px-3 py-1.5 rounded-md text-xs font-semibold transition-all"
-                              style={{
-                                background: s.bg,
-                                color: s.color,
-                                border: s.border,
-                                boxShadow: s.shadow,
-                              }}
-                            >
-                              {s.label}
-                            </button>
-                          );
-                        })}
-                    </div>
-                  )}
-                </td>
+    <>
+      {/* Desktop table — hidden on small screens */}
+      <div className="hidden md:block glass-card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+                <th className="text-left px-6 py-4 font-mono text-xs uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>ID</th>
+                <th className="text-left px-6 py-4 font-mono text-xs uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Username</th>
+                <th className="text-left px-6 py-4 font-mono text-xs uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Role</th>
+                <th className="text-left px-6 py-4 font-mono text-xs uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Created</th>
+                <th className="text-left px-6 py-4 font-mono text-xs uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {users.map((u) => (
+                <tr key={u.id} style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+                  <td className="px-6 py-4 font-mono" style={{ color: "var(--text-muted)" }}>#{u.id}</td>
+                  <td className="px-6 py-4 font-semibold" style={{ color: "var(--text-primary)" }}>{u.username}</td>
+                  <td className="px-6 py-4">
+                    <RoleBadge role={u.role} />
+                  </td>
+                  <td className="px-6 py-4 font-mono text-xs" style={{ color: "var(--text-muted)" }}>
+                    {new Date(u.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4">
+                    {u.id === currentUserId ? (
+                      <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
+                        (you)
+                      </span>
+                    ) : (
+                      <div className="flex gap-2">
+                        {roles
+                          .filter((r) => r !== u.role)
+                          .map((r) => {
+                            const s = roleButtonStyle[r];
+                            return (
+                              <button
+                                key={r}
+                                onClick={() => onChangeRole(u.id, r)}
+                                className="px-3 py-1.5 rounded-md text-xs font-semibold transition-all"
+                                style={{
+                                  background: s.bg,
+                                  color: s.color,
+                                  border: s.border,
+                                  boxShadow: s.shadow,
+                                }}
+                              >
+                                {s.label}
+                              </button>
+                            );
+                          })}
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+
+      {/* Mobile card view — shown on small screens */}
+      <div className="md:hidden flex flex-col gap-3">
+        {users.map((u) => (
+          <div
+            key={u.id}
+            className="glass-card p-4 rounded-xl"
+            style={{ border: "1px solid var(--border-subtle)" }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2.5">
+                <span className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{u.username}</span>
+                <RoleBadge role={u.role} />
+              </div>
+              <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>#{u.id}</span>
+            </div>
+            <p className="text-xs font-mono mb-3" style={{ color: "var(--text-muted)" }}>
+              Joined {new Date(u.created_at).toLocaleDateString()}
+            </p>
+            {u.id === currentUserId ? (
+              <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>(you)</span>
+            ) : (
+              <div className="flex gap-2 flex-wrap">
+                {roles
+                  .filter((r) => r !== u.role)
+                  .map((r) => {
+                    const s = roleButtonStyle[r];
+                    return (
+                      <button
+                        key={r}
+                        onClick={() => onChangeRole(u.id, r)}
+                        className="px-3 py-1.5 rounded-md text-xs font-semibold transition-all"
+                        style={{
+                          background: s.bg,
+                          color: s.color,
+                          border: s.border,
+                          boxShadow: s.shadow,
+                        }}
+                      >
+                        {s.label}
+                      </button>
+                    );
+                  })}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </>
   );
 }
 

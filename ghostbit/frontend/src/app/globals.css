@@ -1170,7 +1170,13 @@ body {
   overflow: hidden;
   background: var(--bg-elevated);
   border: 1px solid var(--border-subtle);
-  padding: 2.25rem 1.75rem;
+  padding: 1.5rem 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .portal-hero {
+    padding: 2.25rem 1.75rem;
+  }
 }
 
 .category-pill {
@@ -1218,7 +1224,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: 0.5rem;
+  width: 100%;
+  max-width: 800px;
+}
+
+@media (min-width: 640px) {
+  .game-overlay-content {
+    padding: 1rem;
+  }
 }
 
 .game-dpad-btn {

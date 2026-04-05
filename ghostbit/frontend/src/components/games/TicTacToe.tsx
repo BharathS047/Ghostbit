@@ -158,7 +158,7 @@ export default function TicTacToe({ onScore }: Props) {
             <button
               key={i}
               onClick={() => handleClick(i)}
-              className="w-[100px] h-[100px] rounded-xl text-3xl font-black flex items-center justify-center transition-all"
+              className="w-[72px] h-[72px] sm:w-[90px] sm:h-[90px] md:w-[100px] md:h-[100px] rounded-xl text-2xl sm:text-3xl font-black flex items-center justify-center transition-all"
               style={{
                 background: isWinCell
                   ? "rgba(34,197,94,0.15)"

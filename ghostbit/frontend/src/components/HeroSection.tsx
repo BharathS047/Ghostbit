@@ -37,7 +37,7 @@ export default function HeroSection() {
 
         {/* Heading */}
         <h1
-          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-tight mb-4"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black leading-tight mb-4"
           style={{ color: "#ececed" }}
         >
           Welcome to{" "}

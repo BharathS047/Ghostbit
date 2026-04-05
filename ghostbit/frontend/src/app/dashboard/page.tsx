@@ -57,23 +57,23 @@ function DashboardContent() {
             <span className="font-bold tracking-tight text-gradient text-base">GhostBit</span>
           </button>
 
-          <nav className="flex items-center gap-1">
+          <nav className="flex items-center gap-0.5 sm:gap-1">
             {(["keys", "embed", "extract"] as Tab[]).map((id) => (
               <button
                 key={id}
                 onClick={() => setActiveTab(id)}
-                className={`tab-btn ${activeTab === id ? "active" : ""}`}
+                className={`tab-btn ${activeTab === id ? "active" : ""} text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5`}
               >
                 {id.charAt(0).toUpperCase() + id.slice(1)}
               </button>
             ))}
-            <div className="ml-4 flex items-center gap-3">
-              <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
+            <div className="ml-2 sm:ml-4 flex items-center gap-2 sm:gap-3">
+              <span className="hidden sm:inline text-xs font-mono" style={{ color: "var(--text-muted)" }}>
                 {user?.username}
               </span>
               <button
                 onClick={logout}
-                className="text-xs font-mono px-3 py-1.5 rounded-md transition-colors"
+                className="text-xs font-mono px-2 sm:px-3 py-1.5 rounded-md transition-colors"
                 style={{
                   color: "var(--text-secondary)",
                   border: "1px solid var(--border-subtle)",
@@ -126,7 +126,7 @@ function InnerPage({ tab }: { tab: Tab }) {
       <div className="relative z-10 max-w-2xl xl:max-w-3xl mx-auto px-4 sm:px-6 py-14 xl:py-20">
         <div className="mb-8 animate-fade-in-up">
           <p className="section-label mb-3">GhostBit / {tab}</p>
-          <h1 className="text-3xl md:text-4xl font-black mb-2" style={{ color: cfg.accent }}>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black mb-2" style={{ color: cfg.accent }}>
             {cfg.label}
           </h1>
           <p style={{ color: "var(--text-secondary)" }}>{cfg.sub}</p>
@@ -166,7 +166,7 @@ function HeroSection({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
               </div>
               <h1
                 className="font-black leading-[0.92] tracking-tight mb-8 animate-fade-in-up"
-                style={{ fontSize: "clamp(3.5rem, 6vw, 8rem)", animationDelay: "0.07s" }}
+                style={{ fontSize: "clamp(2.5rem, 6vw, 8rem)", animationDelay: "0.07s" }}
               >
                 HIDE IN<br />
                 <span className="text-gradient">PLAIN</span><br />

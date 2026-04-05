@@ -496,6 +496,7 @@ export default function PixelRunner({ onScore }: Props) {
           boxShadow: "0 0 32px rgba(74,222,128,0.08)",
           cursor: "pointer",
           maxWidth: "100%",
+          height: "auto",
         }}
         onClick={() => {
           if (gameState === "idle" || gameState === "over") startGame();

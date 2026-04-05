@@ -199,7 +199,7 @@ export default function SnakeGame({ onScore }: Props) {
   return (
     <div className="flex flex-col items-center gap-4">
       {/* Score bar */}
-      <div className="flex items-center justify-between w-full" style={{ maxWidth: W }}>
+      <div className="flex items-center justify-between w-full" style={{ maxWidth: "100%" }}>
         <div className="flex gap-4 text-xs font-mono" style={{ color: "#94a3b8" }}>
           <span>
             Score: <span style={{ color: "#60a5fa" }}>{score}</span>
@@ -216,12 +216,12 @@ export default function SnakeGame({ onScore }: Props) {
       </div>
 
       {/* Canvas */}
-      <div className="relative" style={{ width: W, height: W }}>
+      <div className="relative w-full" style={{ maxWidth: W, aspectRatio: "1" }}>
         <canvas
           ref={canvasRef}
           width={W}
           height={W}
-          className="rounded-xl"
+          className="rounded-xl w-full h-full"
           style={{
             border: "1px solid rgba(255,255,255,0.08)",
             display: "block",
