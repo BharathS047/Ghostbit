@@ -28,22 +28,14 @@ export default function SplineBackground() {
     }
   }, []);
 
-  // Mute any <audio>/<video> elements AND hide the "Made with Spline" watermark
+  // Mute any <audio>/<video> elements Spline injects
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const observer = new MutationObserver(() => {
-      // Mute media
       el.querySelectorAll("audio, video").forEach((media) => {
         (media as HTMLMediaElement).muted = true;
         (media as HTMLMediaElement).volume = 0;
-      });
-      // Hide "Made with Spline" watermark logo
-      el.querySelectorAll("a, div, img").forEach((node) => {
-        const anchor = node.closest("a");
-        if (anchor && anchor.href && anchor.href.includes("spline")) {
-          (anchor as HTMLElement).style.display = "none";
-        }
       });
     });
     observer.observe(el, { childList: true, subtree: true });
@@ -55,7 +47,6 @@ export default function SplineBackground() {
       if (!obj) return;
 
       const n = (obj.name || "").toLowerCase();
-      // Hide text, UI overlays, and noise/grain layers
       if (
         n.includes("text") ||
         n.includes("button") ||
@@ -82,40 +73,73 @@ export default function SplineBackground() {
         hideUnwanted(scene);
       }
 
-      // Disable the "Built with Spline" logo watermark overlay pass
-      const renderer = splineApp._renderer;
-      if (renderer?.logoOverlayPass) {
-        renderer.logoOverlayPass.enabled = false;
-      }
-
-      // Disable post-processing noise/grain passes if present
-      if (renderer?.effectComposer?.passes) {
-        for (const pass of renderer.effectComposer.passes) {
-          const pn = (pass.name || pass.constructor?.name || "").toLowerCase();
-          if (pn.includes("noise") || pn.includes("grain") || pn.includes("film") || pn.includes("logo")) {
-            pass.enabled = false;
+      // Recursively find and disable the logo watermark overlay
+      function disableWatermark(obj: any, depth: number) {
+        if (!obj || depth > 4) return;
+        // Disable logoOverlayPass wherever we find it
+        if (obj.logoOverlayPass) {
+          obj.logoOverlayPass.enabled = false;
+        }
+        // Override setWatermark to prevent re-enabling
+        if (typeof obj.setWatermark === "function") {
+          obj.setWatermark = () => {};
+        }
+        // Check pipeline property
+        if (obj.pipeline) {
+          if (obj.pipeline.logoOverlayPass) {
+            obj.pipeline.logoOverlayPass.enabled = false;
+          }
+          if (typeof obj.pipeline.setWatermark === "function") {
+            obj.pipeline.setWatermark = () => {};
+          }
+          // Also disable in effectComposer passes
+          if (obj.pipeline.effectComposer?.passes) {
+            for (const pass of obj.pipeline.effectComposer.passes) {
+              const pn = (pass.name || pass.constructor?.name || "").toLowerCase();
+              if (pn.includes("logo") || pn.includes("watermark")) {
+                pass.enabled = false;
+              }
+            }
+          }
+        }
+        // Check effectComposer directly
+        if (obj.effectComposer?.passes) {
+          for (const pass of obj.effectComposer.passes) {
+            const pn = (pass.name || pass.constructor?.name || "").toLowerCase();
+            if (pn.includes("logo") || pn.includes("watermark")) {
+              pass.enabled = false;
+            }
+          }
+        }
+        // Recurse into common property names
+        for (const key of ["_renderer", "renderer", "_pipeline", "pipeline", "_composer"]) {
+          if (obj[key] && obj[key] !== obj) {
+            disableWatermark(obj[key], depth + 1);
           }
         }
       }
 
-      // Also check for effect composer on the app itself
-      if (splineApp._composer?.passes) {
-        for (const pass of splineApp._composer.passes) {
-          const pn = (pass.name || pass.constructor?.name || "").toLowerCase();
-          if (pn.includes("noise") || pn.includes("grain") || pn.includes("film") || pn.includes("logo")) {
-            pass.enabled = false;
-          }
+      disableWatermark(splineApp, 0);
+
+      // Also keep disabling it on every frame for a short while
+      // (the watermark texture may load asynchronously after onLoad)
+      let frames = 0;
+      function keepDisabling() {
+        disableWatermark(splineApp, 0);
+        frames++;
+        if (frames < 120) {
+          requestAnimationFrame(keepDisabling);
         }
       }
+      requestAnimationFrame(keepDisabling);
 
-      // Traverse Three.js scene for ShaderMaterial-based noise
+      // Disable noise/grain shader uniforms
       if (scene?.traverse) {
         scene.traverse((child: any) => {
           if (child?.material) {
             const mats = Array.isArray(child.material) ? child.material : [child.material];
             for (const mat of mats) {
               if (mat?.uniforms) {
-                // Disable noise intensity uniforms commonly used in grain shaders
                 if (mat.uniforms.noiseIntensity) mat.uniforms.noiseIntensity.value = 0;
                 if (mat.uniforms.grainIntensity) mat.uniforms.grainIntensity.value = 0;
                 if (mat.uniforms.nIntensity) mat.uniforms.nIntensity.value = 0;
@@ -132,33 +156,32 @@ export default function SplineBackground() {
   return (
     <div
       ref={containerRef}
+      className="spline-bg-root"
       style={{
         position: "absolute",
         inset: 0,
         zIndex: 0,
-        width: "100%",
-        height: "100%",
+        width: "100vw",
+        height: "100vh",
         overflow: "hidden",
       }}
     >
       <Spline
-        style={{ width: "100%", height: "100%" }}
+        style={{ width: "100vw", height: "100vh", display: "block" }}
         scene="https://prod.spline.design/D71snLIIxZPtQbcp/scene.splinecode"
         onLoad={onLoad}
       />
-      {/* Force canvas to fill container and hide any watermark elements */}
-      <style jsx>{`
-        div :global(canvas) {
+      {/* Force all Spline wrapper divs and canvas to fill the container */}
+      <style jsx global>{`
+        .spline-bg-root > div,
+        .spline-bg-root > div > div,
+        .spline-bg-root > div > div > div,
+        .spline-bg-root canvas {
           width: 100% !important;
           height: 100% !important;
           display: block !important;
-        }
-        div :global(a[href*="spline"]) {
-          display: none !important;
-        }
-        div :global(> div) {
-          width: 100% !important;
-          height: 100% !important;
+          position: absolute !important;
+          inset: 0 !important;
         }
       `}</style>
     </div>
