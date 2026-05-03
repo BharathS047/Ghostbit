@@ -155,7 +155,7 @@ function HeroSection({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
         <div className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 xl:px-16 min-h-screen">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 xl:gap-24 items-center min-h-screen pt-16">
             <div className="py-16 lg:py-0">
-              <div className="flex items-center gap-2.5 mb-10 animate-fade-in-up">
+              <div className="flex items-center gap-2.5 mb-6 animate-fade-in-up">
                 <span
                   className="w-1.5 h-1.5 rounded-full block shrink-0"
                   style={{ background: "var(--accent-primary)" }}
@@ -165,30 +165,30 @@ function HeroSection({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
                 </span>
               </div>
               <h1
-                className="font-black leading-[0.92] tracking-tight mb-8 animate-fade-in-up"
-                style={{ fontSize: "clamp(2.5rem, 6vw, 8rem)", animationDelay: "0.07s" }}
+                className="font-black leading-[0.92] tracking-tight mb-6 animate-fade-in-up"
+                style={{ fontSize: "clamp(1.75rem, 4vw, 5rem)", animationDelay: "0.07s" }}
               >
                 HIDE IN<br />
                 <span className="text-gradient">PLAIN</span><br />
                 SIGHT.
               </h1>
               <p
-                className="text-lg xl:text-xl max-w-md leading-relaxed mb-12 animate-fade-in-up"
+                className="text-sm xl:text-base max-w-sm leading-relaxed mb-8 animate-fade-in-up"
                 style={{ color: "var(--text-secondary)", animationDelay: "0.14s" }}
               >
                 Military-grade steganography framework. Encrypt messages and embed
                 them invisibly into images, audio, and video.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: "0.21s" }}>
-                <button onClick={() => onNavigate("embed")} className="btn-primary px-8 py-4 text-base">
+              <div className="flex flex-col sm:flex-row gap-3 animate-fade-in-up" style={{ animationDelay: "0.21s" }}>
+                <button onClick={() => onNavigate("embed")} className="btn-primary px-6 py-3 text-sm">
                   Start Embedding &rarr;
                 </button>
-                <button onClick={() => onNavigate("keys")} className="btn-secondary px-8 py-4 text-base">
+                <button onClick={() => onNavigate("keys")} className="btn-secondary px-6 py-3 text-sm">
                   Generate Keys
                 </button>
               </div>
             </div>
-            <div className="relative w-full aspect-square max-w-[320px] sm:max-w-[400px] md:max-w-[500px] lg:max-w-[600px] xl:max-w-[750px] mx-auto">
+            <div className="relative w-full aspect-square max-w-[220px] sm:max-w-[280px] md:max-w-[340px] lg:max-w-[400px] xl:max-w-[460px] mx-auto">
               <ParticleSphere />
             </div>
           </div>
@@ -208,7 +208,7 @@ function HeroSection({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
             <p className="section-label mb-4">&mdash; How it Works &mdash;</p>
             <h2
               className="font-black leading-tight mb-5"
-              style={{ fontSize: "clamp(2.2rem, 4.5vw, 4rem)" }}
+              style={{ fontSize: "clamp(1.5rem, 3vw, 2.75rem)" }}
             >
               Three Steps to <span className="text-gradient">Invisibility</span>
             </h2>
