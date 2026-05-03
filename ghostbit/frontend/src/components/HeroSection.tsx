@@ -72,11 +72,11 @@ export default function HeroSection() {
           border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        /* Heading — scales from 1.6rem (mobile) to 3rem (desktop) */
+        /* Heading — scales from 1.6rem (mobile) to 3rem (desktop), always one line */
         .hero-heading {
           color: #ececed;
           font-size: clamp(1.6rem, 4.5vw, 3rem);
-          max-width: min(18ch, 90vw);
+          white-space: nowrap;
         }
 
         /* Subtitle — scales from 0.85rem to 1.05rem */
