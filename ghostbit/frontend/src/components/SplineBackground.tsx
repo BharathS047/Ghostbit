@@ -161,13 +161,13 @@ export default function SplineBackground() {
         position: "absolute",
         inset: 0,
         zIndex: 0,
-        width: "100%",
-        height: "100%",
+        width: "100vw",
+        height: "100vh",
         overflow: "hidden",
       }}
     >
       <Spline
-        style={{ width: "100%", height: "100%", display: "block" }}
+        style={{ width: "100vw", height: "100vh", display: "block" }}
         scene="https://prod.spline.design/D71snLIIxZPtQbcp/scene.splinecode"
         onLoad={onLoad}
       />
@@ -177,8 +177,8 @@ export default function SplineBackground() {
         .spline-bg-root > div > div,
         .spline-bg-root > div > div > div,
         .spline-bg-root canvas {
-          width: 100% !important;
-          height: 100% !important;
+          width: 100vw !important;
+          height: 100vh !important;
           display: block !important;
           position: absolute !important;
           inset: 0 !important;
