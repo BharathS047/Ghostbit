@@ -161,13 +161,13 @@ export default function SplineBackground() {
         position: "absolute",
         inset: 0,
         zIndex: 0,
-        width: "100vw",
-        height: "100vh",
+        width: "100%",
+        height: "100%",
         overflow: "hidden",
       }}
     >
       <Spline
-        style={{ width: "100vw", height: "100vh", display: "block" }}
+        style={{ width: "100%", height: "100%", display: "block" }}
         scene="https://prod.spline.design/D71snLIIxZPtQbcp/scene.splinecode"
         onLoad={onLoad}
       />

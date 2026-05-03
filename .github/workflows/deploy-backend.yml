@@ -7,8 +7,6 @@ on:
       - 'ghostbit/backend/**'
       - 'ghostbit/core/**'
       - 'ghostbit/stego/**'
-      - 'ghostbit/metrics/**'
-      - 'ghostbit/app/**'
       - 'ghostbit/__init__.py'
       - 'requirements.txt'
       - '.github/workflows/deploy-backend.yml'
@@ -25,10 +23,8 @@ jobs:
         run: |
           zip -r deploy.zip \
             ghostbit/__init__.py \
-            ghostbit/app/ \
             ghostbit/backend/ \
             ghostbit/core/ \
-            ghostbit/metrics/ \
             ghostbit/stego/ \
             requirements.txt \
             -x "**/__pycache__/*" "**/*.pyc" "**/*.db"

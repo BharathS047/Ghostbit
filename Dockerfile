@@ -1,12 +1,11 @@
-# GhostBit Docker Configuration
-# Multi-Modal Steganography Framework
+# GhostBit — FastAPI Backend
+# Frontend (Next.js) is built and deployed separately.
 
 FROM python:3.11-slim
 
-# Set working directory
 WORKDIR /app
 
-# Install system dependencies for OpenCV and audio processing
+# System dependencies for OpenCV, audio, and video processing
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     libglib2.0-0 \
@@ -17,20 +16,13 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
 COPY requirements.txt .
-
-# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
 COPY ghostbit/ ./ghostbit/
 
-# Expose Streamlit port
-EXPOSE 8501
+EXPOSE 8000
 
-# Health check
-HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health || exit 1
+HEALTHCHECK CMD curl --fail http://localhost:8000/api/health || exit 1
 
-# Run the application
-CMD ["streamlit", "run", "ghostbit/app/streamlit_app.py", "--server.address=0.0.0.0", "--server.port=8501"]
+CMD ["uvicorn", "ghostbit.backend.main:app", "--host", "0.0.0.0", "--port", "8000"]

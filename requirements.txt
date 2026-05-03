@@ -8,7 +8,6 @@ gunicorn>=21.2.0
 python-multipart>=0.0.9
 pydantic[email]>=2.0.0
 email-validator>=2.0.0
-streamlit>=1.28.0
 
 # Image Processing
 opencv-python-headless>=4.8.0
@@ -29,15 +28,9 @@ cryptography>=41.0.0
 # Azure Communication Services
 azure-communication-email>=1.0.0
 
-# Metrics
-scikit-image>=0.21.0
-
 # Testing
 pytest>=7.4.0
 pytest-cov>=4.1.0
-
-# Documentation
-python-docx>=0.8.11
 
 # Utilities
 tqdm>=4.66.0

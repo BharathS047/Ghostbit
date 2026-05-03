@@ -151,20 +151,6 @@ def get_user_by_email(email: str) -> dict | None:
     return dict(row) if row else None
 
 
-def get_user_by_verification_token(token: str) -> dict | None:
-    conn = get_connection()
-    row = conn.execute("SELECT * FROM users WHERE verification_token = ?", (token,)).fetchone()
-    conn.close()
-    return dict(row) if row else None
-
-
-def get_user_by_reset_token(token: str) -> dict | None:
-    conn = get_connection()
-    row = conn.execute("SELECT * FROM users WHERE reset_token = ?", (token,)).fetchone()
-    conn.close()
-    return dict(row) if row else None
-
-
 def set_verification_token(user_id: int, token: str, expiry: str) -> None:
     conn = get_connection()
     conn.execute(
