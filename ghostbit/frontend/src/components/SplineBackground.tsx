@@ -158,7 +158,7 @@ export default function SplineBackground() {
       ref={containerRef}
       className="spline-bg-root"
       style={{
-        position: "absolute",
+        position: "fixed",
         inset: 0,
         zIndex: 0,
         width: "100vw",
