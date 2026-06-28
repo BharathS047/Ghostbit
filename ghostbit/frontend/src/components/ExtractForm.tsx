@@ -11,6 +11,7 @@ export default function ExtractForm() {
   const [loading, setLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [result, setResult] = useState<{ message: string; integrity_valid: boolean; metadata: any } | null>(null);
+  const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleDrop = (e: React.DragEvent) => {
@@ -24,6 +25,7 @@ export default function ExtractForm() {
     if (!file || !privateKey) return;
     setLoading(true);
     setResult(null);
+    setError("");
     try {
       const token = localStorage.getItem("ghostbit_token");
       const formData = new FormData();
@@ -37,7 +39,7 @@ export default function ExtractForm() {
       const data = await res.json();
       setResult(data);
     } catch (err: any) {
-      alert(`Extraction failed: ${err.message}`);
+      setError(err.message || "Extraction failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -62,7 +64,8 @@ export default function ExtractForm() {
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => fileRef.current?.click()}
-          className="relative p-8 rounded-xl border-2 border-dashed transition-all duration-300 cursor-pointer text-center"
+          className="relative rounded-xl border-2 border-dashed transition-all duration-300 cursor-pointer text-center"
+          style={{ padding: "clamp(1.25rem, 4vw, 2rem)" }}
           style={{
             borderColor: isDragging ? "var(--accent-extract)" : file ? "var(--accent-extract)" : "var(--border-subtle)",
             background: isDragging ? "rgba(185,28,28,0.05)" : file ? "rgba(185,28,28,0.05)" : "rgba(0,0,0,0.2)",
@@ -112,6 +115,18 @@ export default function ExtractForm() {
             style={{ color: "#fca5a5", borderColor: "rgba(185,28,28,0.15)" }}
           />
         </div>
+
+        {/* Inline error */}
+        {error && (
+          <div
+            role="alert"
+            className="flex items-start gap-2.5 text-xs font-mono px-4 py-3 rounded-lg"
+            style={{ color: "#f87171", background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.2)" }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            {error}
+          </div>
+        )}
 
         {/* Submit */}
         <button

@@ -1,4 +1,4 @@
-<![CDATA[# GhostBit
+# GhostBit
 
 **Multi-Modal Content-Adaptive Steganography Framework Integrating AES-256 Cryptography**
 
@@ -12,7 +12,7 @@ GhostBit is a secure steganography framework that enables hiding encrypted messa
 - **Content-Adaptive Embedding** — Edge detection (images), spectral complexity (audio), motion analysis (video)
 - **Integrity Verification** — SHA-256 hash verification + GCM authentication tag
 - **Quality Metrics** — PSNR, SSIM, SNR, histogram correlation, and frame-level analysis
-- **Dual Interface** — Streamlit-based UI for quick use, plus a modern Next.js web app with a FastAPI backend
+- **Modern Web App** — Next.js frontend with a FastAPI backend, user accounts, email verification, and admin approval
 - **Docker Support** — Containerized deployment with a single Dockerfile
 - **Comprehensive Tests** — Crypto, payload, image, audio, and video round-trip tests via pytest
 
@@ -32,13 +32,13 @@ GhostBit is a secure steganography framework that enables hiding encrypted messa
                     ┌──────────────────────────────┐
                     │       Interface Layer         │
                     │  Next.js Frontend (Port 3000) │
-                    │  Streamlit App   (Port 8501)  │
                     └──────────────┬───────────────┘
                                    │
                     ┌──────────────▼───────────────┐
                     │     FastAPI Backend (8000)     │
-                    │  /api/keys  /api/embed         │
-                    │  /api/extract  /api/capacity    │
+                    │  auth · admin · scores         │
+                    │  /api/embed  /api/extract      │
+                    │  /api/capacity  (SQLite DB)    │
                     └──────────────┬───────────────┘
                                    │
          ┌─────────────────────────┼─────────────────────────┐
@@ -62,19 +62,20 @@ GhostBit is a secure steganography framework that enables hiding encrypted messa
 ```
 GhostBit/
 ├── ghostbit/
-│   ├── app/
-│   │   └── streamlit_app.py          # Streamlit web interface
-│   ├── backend/
-│   │   └── main.py                   # FastAPI REST API
+│   ├── backend/                      # FastAPI REST API
+│   │   ├── main.py                   # App entry point (uvicorn target)
+│   │   ├── database.py               # SQLite setup (auto-created)
+│   │   ├── auth.py                   # Token auth & roles
+│   │   ├── routes_auth.py            # Register / login / verify
+│   │   ├── routes_admin.py           # Admin & user approval
+│   │   ├── routes_scores.py          # Game scores
+│   │   ├── services/email_service.py # Email (ACS / console fallback)
+│   │   └── .env.local                # Backend dev env vars
 │   ├── frontend/                     # Next.js / React / TypeScript
 │   │   ├── src/
-│   │   │   ├── app/                  # Pages & global styles
-│   │   │   └── components/           # UI components
-│   │   │       ├── EmbedForm.tsx
-│   │   │       ├── ExtractForm.tsx
-│   │   │       ├── KeyGenerator.tsx
-│   │   │       ├── MatrixLoadingScreen.tsx
-│   │   │       └── ParticleSphere.tsx
+│   │   │   ├── app/                  # Pages (login, dashboard, admin, play…)
+│   │   │   ├── components/           # UI components (EmbedForm, ExtractForm…)
+│   │   │   └── context/AuthContext.tsx
 │   │   └── package.json
 │   ├── core/
 │   │   ├── crypto.py                 # X25519, HKDF, AES-256-GCM
@@ -104,70 +105,107 @@ GhostBit/
 ├── Dockerfile
 ├── requirements.txt
 ├── pytest.ini
+├── start_dev.ps1                     # Run backend + frontend (Windows)
+├── start_dev.sh                      # Run backend + frontend (Linux/macOS)
 └── README.md
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Running Locally
+
+GhostBit runs as two processes: a **FastAPI backend** (port `8000`) and a **Next.js frontend** (port `3000`). The backend auto-creates a SQLite database and seeds an admin account on first start.
 
 ### Prerequisites
 
 - **Python 3.11+**
-- **Node.js 18+** (for the Next.js frontend)
-- **FFmpeg** (for video processing)
+- **Node.js 18+** and npm (for the Next.js frontend)
+- **Git**
+- FFmpeg is **not** required — it ships bundled via the `imageio-ffmpeg` Python package
 
-### Installation
+### 1. Clone & install dependencies
 
 ```bash
 # Clone the repository
 git clone https://github.com/BharathS047/Ghostbit.git
 cd GhostBit
 
-# Create a virtual environment (recommended)
+# --- Backend (Python) ---
 python -m venv venv
-venv\Scripts\activate        # Windows
-# source venv/bin/activate   # Linux / macOS
-
-# Install Python dependencies
+venv\Scripts\activate          # Windows (PowerShell/CMD)
+# source venv/bin/activate     # Linux / macOS
 pip install -r requirements.txt
 
-# Install frontend dependencies
+# --- Frontend (Node) ---
 cd ghostbit/frontend
 npm install
 cd ../..
 ```
 
-### Running the Applications
+### 2. Configure environment variables
 
-#### Option 1 — Streamlit UI (quick start)
+**Backend** — `ghostbit/backend/.env.local` (a working dev file is already included; edit as needed):
 
-```bash
-streamlit run ghostbit/app/streamlit_app.py
+| Variable                          | Purpose                                              | Default                          |
+| --------------------------------- | ---------------------------------------------------- | -------------------------------- |
+| `GHOSTBIT_SECRET_KEY`             | Signing key for auth tokens                          | `dev-secret-key-change-this-...` |
+| `GHOSTBIT_ALLOWED_ORIGINS`        | CORS origins (comma-separated)                       | `http://localhost:3000`          |
+| `GHOSTBIT_ADMIN_USERNAME`         | Admin account seeded on startup                      | `Bharath`                        |
+| `GHOSTBIT_ADMIN_PASSWORD`         | Admin password                                       | `Password@123`                   |
+| `GHOSTBIT_ADMIN_EMAIL`            | Admin email                                          | —                                |
+| `GHOSTBIT_ACS_CONNECTION_STRING`  | Azure Communication Services (email). **Leave blank locally** | _(empty)_               |
+| `GHOSTBIT_FROM_EMAIL`             | Sender address for emails. **Leave blank locally**   | _(empty)_                        |
+| `GHOSTBIT_FRONTEND_URL`           | Used in email links                                  | `http://localhost:3000`          |
+| `GHOSTBIT_DB_PATH`                | Optional SQLite file path override                   | `./ghostbit.db`                  |
+
+> **Email in dev:** when `GHOSTBIT_ACS_CONNECTION_STRING` / `GHOSTBIT_FROM_EMAIL` are blank, verification and password-reset codes are **printed to the backend console** instead of being emailed.
+
+**Frontend** — optional `ghostbit/frontend/.env.local`. Only needed if the backend is not on the default URL:
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
-Open your browser at **http://localhost:8501**
+### 3. Start both servers
 
-#### Option 2 — Next.js Frontend + FastAPI Backend
+#### Option A — Helper script (recommended)
+
+Loads `.env.local`, starts the backend, then the frontend, and cleans up both on exit:
 
 ```bash
-# Terminal 1 — Start the FastAPI backend
-cd ghostbit/backend
-uvicorn main:app --reload --port 8000
+# Windows (PowerShell)
+.\start_dev.ps1
 
-# Terminal 2 — Start the Next.js frontend
+# Linux / macOS
+chmod +x start_dev.sh   # first time only
+./start_dev.sh
+```
+
+#### Option B — Two terminals (manual)
+
+```bash
+# Terminal 1 — FastAPI backend (run from the repo root, with venv activated)
+python -m uvicorn ghostbit.backend.main:app --reload --port 8000
+
+# Terminal 2 — Next.js frontend
 cd ghostbit/frontend
 npm run dev
 ```
 
-- Frontend: **http://localhost:3000**
-- API: **http://localhost:8000/docs** (interactive Swagger docs)
+> Run the backend from the **repo root** using the module path `ghostbit.backend.main:app` (not from inside `ghostbit/backend`) so the `ghostbit` package imports resolve.
 
-#### Option 3 — Docker
+### 4. Open the app
+
+- **Frontend:** http://localhost:3000
+- **API + interactive Swagger docs:** http://localhost:8000/docs
+
+Log in with the seeded admin credentials (default `Bharath` / `Password@123`). New users register, verify via the emailed (or console-printed) code, and must be **Approved** by an admin before they can use the embed/extract APIs.
+
+### Docker
 
 ```bash
 docker build -t ghostbit .
-docker run -p 8501:8501 ghostbit
+docker run -p 8000:8000 ghostbit
 ```
 
 ---
@@ -218,15 +256,16 @@ pytest ghostbit/tests/ --cov=ghostbit --cov-report=term-missing
 
 | Layer        | Technology                                                      |
 | ------------ | --------------------------------------------------------------- |
-| Frontend     | Next.js 16, React 19, TypeScript, Tailwind CSS, Three.js        |
+| Frontend     | Next.js 16, React 19, TypeScript, Tailwind CSS, Three.js, Spline |
 | Backend API  | FastAPI, Uvicorn, Pydantic                                      |
-| Streamlit UI | Streamlit ≥ 1.28                                                |
+| Auth / Data  | SQLite, token-based auth, Azure Communication Services (email)  |
 | Crypto       | `cryptography` (X25519, HKDF, AES-256-GCM)                     |
 | Image        | OpenCV, Pillow, NumPy                                           |
 | Audio        | SoundFile                                                       |
 | Video        | OpenCV, imageio, imageio-ffmpeg, PyAV                           |
 | Metrics      | scikit-image (SSIM), NumPy                                      |
 | Testing      | pytest, pytest-cov                                              |
+| Dev tooling  | `start_dev.ps1` / `start_dev.sh` (run both servers)            |
 | Container    | Docker (Python 3.11-slim)                                       |
 
 ---
@@ -245,4 +284,3 @@ Detailed documentation is available in [`ghostbit/docs/`](ghostbit/docs/):
 ## 📄 License
 
 MIT License
-]]>

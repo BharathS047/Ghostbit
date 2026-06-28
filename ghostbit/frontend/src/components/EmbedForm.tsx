@@ -10,6 +10,7 @@ export default function EmbedForm() {
   const [publicKey, setPublicKey] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [capacity, setCapacity] = useState<any>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -42,6 +43,7 @@ export default function EmbedForm() {
     e.preventDefault();
     if (!file || !publicKey || !message) return;
     setLoading(true);
+    setError("");
     try {
       const token = localStorage.getItem("ghostbit_token");
       const formData = new FormData();
@@ -66,7 +68,7 @@ export default function EmbedForm() {
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch (err: any) {
-      alert(`Embedding failed: ${err.message}`);
+      setError(err.message || "Embedding failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -91,7 +93,8 @@ export default function EmbedForm() {
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => fileRef.current?.click()}
-          className="relative p-8 rounded-xl border-2 border-dashed transition-all duration-300 cursor-pointer text-center"
+          className="relative rounded-xl border-2 border-dashed transition-all duration-300 cursor-pointer text-center"
+          style={{ padding: "clamp(1.25rem, 4vw, 2rem)" }}
           style={{
             borderColor: isDragging ? "var(--accent-primary)" : file ? "var(--accent-secondary)" : "var(--border-subtle)",
             background: isDragging ? "rgba(239,68,68,0.05)" : file ? "rgba(220,38,38,0.05)" : "rgba(0,0,0,0.2)",
@@ -163,6 +166,18 @@ export default function EmbedForm() {
             className="glass-input w-full max-w-full h-28 p-4 text-sm resize-none"
           />
         </div>
+
+        {/* Inline error */}
+        {error && (
+          <div
+            role="alert"
+            className="flex items-start gap-2.5 text-xs font-mono px-4 py-3 rounded-lg"
+            style={{ color: "#f87171", background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.2)" }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            {error}
+          </div>
+        )}
 
         {/* Submit */}
         <button

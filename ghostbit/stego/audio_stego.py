@@ -3,18 +3,19 @@ Audio steganography module for WAV files.
 Uses frame complexity analysis for content-adaptive embedding.
 """
 
+import struct
 import numpy as np
 import soundfile as sf
 import io
 from typing import Tuple, List, Dict, Any, Optional
 
-from ..core.prng import KeySeededPRNG, create_embedding_prng
+from ..core.prng import KeySeededPRNG, derive_prng_seed
 from ..core.payload import (
-    MediaType, pack_payload, unpack_payload, pack_plaintext, unpack_plaintext,
-    payload_to_bits, bits_to_payload, pack_with_length, unpack_with_length
+    MediaType, pack_payload, unpack_payload, unpack_payload_header,
+    pack_plaintext, unpack_plaintext, payload_to_bits, bits_to_payload,
 )
 from ..core.crypto import Encryptor, Decryptor, load_public_key, KeyPair
-from ..core.capacity import estimate_audio_capacity, check_capacity
+from ..core.capacity import estimate_audio_capacity
 
 
 def compute_frame_energy(frame: np.ndarray) -> float:
@@ -189,27 +190,41 @@ class AudioSteganography:
         
         receiver_pub = load_public_key(receiver_public_key_pem)
         encryptor = Encryptor(receiver_pub)
-        
+
         plaintext = pack_plaintext(message)
         nonce, eph_pub, ciphertext = encryptor.encrypt(plaintext)
-        
+
         payload = pack_payload(MediaType.AUDIO, nonce, eph_pub, ciphertext)
-        payload_with_len = pack_with_length(payload)
-        payload_bits = payload_to_bits(payload_with_len)
-        
-        samples_needed = len(payload_bits)
-        
-        if samples_needed > len(audio_int):
+        header_part = payload[:len(payload) - len(ciphertext)]   # magic … ct_len
+        region_a = struct.pack('>I', len(header_part)) + header_part
+
+        # One LSB per sample: header is sequential, ciphertext is shuffled by a
+        # PRNG seeded from the ECDH shared secret (see image_stego.embed).
+        a_bits = payload_to_bits(region_a)
+        c_bits = payload_to_bits(ciphertext)
+        a_samples = len(a_bits)
+        c_samples = len(c_bits)
+        total_samples = len(audio_int)
+        pool_n = total_samples - a_samples
+
+        if c_samples > pool_n:
             raise ValueError(
-                f"Message too large: need {samples_needed} samples, "
-                f"only {len(audio_int)} samples available"
+                f"Message too large: need {a_samples + c_samples} samples, "
+                f"only {total_samples} samples available"
             )
-        
+
         stego_audio = audio_int.copy()
-        
-        for i in range(samples_needed):
-            stego_audio[i] = embed_bit_in_sample(stego_audio[i], payload_bits[i])
-        
+
+        # Header: sequential samples [0, a_samples)
+        for i in range(a_samples):
+            stego_audio[i] = embed_bit_in_sample(stego_audio[i], a_bits[i])
+
+        # Ciphertext: shared-secret-seeded sample positions from the remaining pool
+        prng = KeySeededPRNG(derive_prng_seed(encryptor.shared_secret))
+        for bit, p in zip(c_bits, prng.sample_indices(pool_n, c_samples)):
+            k = a_samples + p
+            stego_audio[k] = embed_bit_in_sample(stego_audio[k], bit)
+
         if is_stereo:
             stego_out = np.zeros_like(audio, dtype=np.int16)
             stego_out[:, 0] = stego_audio
@@ -227,13 +242,13 @@ class AudioSteganography:
         stego_wav_bytes = output_buffer.getvalue()
         
         metadata = {
-            "samples_used": samples_needed,
-            "bits_embedded": len(payload_bits),
+            "samples_used": a_samples + c_samples,
+            "bits_embedded": a_samples + c_samples,
             "payload_size": len(payload),
             "sample_rate": sample_rate,
             "duration_seconds": len(audio) / sample_rate
         }
-        
+
         return stego_wav_bytes, metadata
     
     def extract(
@@ -252,54 +267,63 @@ class AudioSteganography:
             Tuple of (message, integrity_valid, metadata_dict)
         """
         audio, sample_rate = sf.read(io.BytesIO(stego_audio_data), dtype='int16')
-        
+
         if len(audio.shape) > 1:
             audio_int = audio[:, 0]
         else:
             audio_int = audio
-        
-        length_bits = []
-        for i in range(32):
-            length_bits.append(extract_bit_from_sample(audio_int[i]))
-        
-        length_bytes = bits_to_payload(length_bits)
-        payload_len = int.from_bytes(length_bytes, 'big')
-        
+
+        total_samples = len(audio_int)
+
+        # 1) Read the 4-byte header-region length from the sequential prefix.
+        if total_samples < 32:
+            raise ValueError("Audio too small to contain a payload")
+        length_bits = [extract_bit_from_sample(audio_int[i]) for i in range(32)]
+        header_len = int.from_bytes(bits_to_payload(length_bits), 'big')
+
         min_header_size = 9 + 12 + 2 + 32 + 4
-        if payload_len < min_header_size or payload_len > 10 * 1024 * 1024:
+        if header_len < min_header_size or header_len > 4096:
             raise ValueError("Invalid payload length or corrupted data")
-        
-        total_bits_needed = (4 + payload_len) * 8
-        
-        if total_bits_needed > len(audio_int):
-            raise ValueError("Not enough samples for extraction")
-        
-        all_bits = []
-        for i in range(total_bits_needed):
-            all_bits.append(extract_bit_from_sample(audio_int[i]))
-        
-        payload_data = bits_to_payload(all_bits[:total_bits_needed])
-        payload = unpack_with_length(payload_data)
-        
-        header = unpack_payload(payload)
-        
-        if header.media_type != MediaType.AUDIO:
-            raise ValueError(f"Wrong media type: expected AUDIO, got {header.media_type}")
-        
+
+        # 2) Read the full header region sequentially and parse it.
+        a_samples = 32 + header_len * 8
+        if a_samples > total_samples:
+            raise ValueError("Not enough samples for payload header")
+        a_bits = [extract_bit_from_sample(audio_int[i]) for i in range(a_samples)]
+        region_a = bits_to_payload(a_bits)
+        header_part = region_a[4:4 + header_len]
+
+        info = unpack_payload_header(header_part)
+        if info.media_type != MediaType.AUDIO:
+            raise ValueError(f"Wrong media type: expected AUDIO, got {info.media_type}")
+
+        # 3) Re-derive the shared secret and the same shuffled ciphertext positions.
         keypair = KeyPair.from_private_pem(private_key_pem)
         decryptor = Decryptor(keypair.private_key)
-        
+        prng = KeySeededPRNG(derive_prng_seed(decryptor.derive_shared_secret(info.eph_pub)))
+
+        pool_n = total_samples - a_samples
+        c_samples = info.ct_len * 8
+        if c_samples > pool_n:
+            raise ValueError("Not enough samples for payload extraction")
+        c_bits = [
+            extract_bit_from_sample(audio_int[a_samples + p])
+            for p in prng.sample_indices(pool_n, c_samples)
+        ]
+        ciphertext = bits_to_payload(c_bits)
+
+        # 4) Reassemble, decrypt, verify.
+        header = unpack_payload(header_part + ciphertext)
         plaintext = decryptor.decrypt(header.nonce, header.eph_pub, header.ciphertext)
-        
         message, integrity_valid = unpack_plaintext(plaintext)
-        
+
         metadata = {
-            "payload_size": len(payload),
+            "payload_size": len(header_part) + len(ciphertext),
             "media_type": "audio",
             "integrity_verified": integrity_valid,
             "sample_rate": sample_rate
         }
-        
+
         return message, integrity_valid, metadata
 
 

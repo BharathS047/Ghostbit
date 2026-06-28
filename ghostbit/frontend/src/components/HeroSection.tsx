@@ -7,42 +7,50 @@ export default function HeroSection() {
   const router = useRouter();
 
   return (
-    <section className="hero-section relative w-full bg-[#0a0a0b] flex items-center justify-center overflow-hidden">
+    <>
+      {/* Viewport-level background — sibling of the section so it escapes any
+          local stacking context and stays fixed to the visible viewport. */}
       <SplineBackground />
 
-      <div className="absolute inset-0 bg-black/30 pointer-events-none" />
+      <section className="hero-section relative w-full flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 bg-black/30 pointer-events-none" />
 
-      <div className="hero-content relative z-10 flex flex-col items-center text-center hero-fade-in pointer-events-none">
+        {/* Content layer: pointer-events:none everywhere except the buttons
+            themselves, so cursor movement between/around buttons still drives
+            the Spline scene below. */}
+        <div className="hero-content relative z-10 flex flex-col items-center text-center hero-fade-in pointer-events-none">
 
-        <span className="hero-badge backdrop-blur-md">
-          Free-to-Play Browser Games
-        </span>
+          <span className="hero-badge backdrop-blur-md">
+            Free-to-Play Browser Games
+          </span>
 
-        <h1 className="hero-heading font-black leading-tight">
-          Welcome to{" "}
-          <span style={{ color: "#6366f1" }}>GhostPlay</span>
-        </h1>
+          <h1 className="hero-heading font-black leading-tight">
+            Welcome to{" "}
+            <span style={{ color: "#6366f1" }}>GhostPlay</span>
+          </h1>
 
-        <p className="hero-sub leading-relaxed">
-          Jump into instant browser games. No downloads, no installs — just play.
-        </p>
+          <p className="hero-sub leading-relaxed">
+            Jump into instant browser games. No downloads, no installs — just play.
+          </p>
 
-        <div className="hero-buttons cursor-auto pointer-events-auto">
-          <button
-            onClick={() => router.push("/login?mode=signup")}
-            className="hero-btn-primary font-bold transition-all duration-200 hover:brightness-110"
-          >
-            Sign Up — It&apos;s Free
-          </button>
-          <button
-            onClick={() => router.push("/login")}
-            className="hero-btn-secondary font-bold transition-all duration-200 hover:bg-white/10"
-          >
-            Login
-          </button>
+          <div className="hero-buttons cursor-auto">
+            <button
+              onClick={() => router.push("/login?mode=signup")}
+              className="hero-btn-primary font-bold transition-all duration-200 hover:brightness-110"
+              style={{ pointerEvents: "auto" }}
+            >
+              Sign Up — It&apos;s Free
+            </button>
+            <button
+              onClick={() => router.push("/login")}
+              className="hero-btn-secondary font-bold transition-all duration-200 hover:bg-white/10"
+              style={{ pointerEvents: "auto" }}
+            >
+              Login
+            </button>
+          </div>
+
         </div>
-
-      </div>
 
       <style jsx>{`
         /* Full viewport — dvh accounts for mobile browser chrome; vh is the fallback */
@@ -147,6 +155,7 @@ export default function HeroSection() {
           }
         }
       `}</style>
-    </section>
+      </section>
+    </>
   );
 }

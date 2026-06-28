@@ -45,19 +45,23 @@ class KeySeededPRNG:
         return result
     
     def get_int(self, max_val: int) -> int:
-        """Get random integer in range [0, max_val)."""
+        """Get a uniform random integer in range [0, max_val).
+
+        Uses rejection sampling on the raw byte range to avoid modulo bias:
+        any draw at or above the largest multiple of max_val that fits in
+        ``bytes_needed`` bytes is rejected and redrawn.
+        """
         if max_val <= 0:
             raise ValueError("max_val must be positive")
-        
-        bytes_needed = (max_val.bit_length() + 7) // 8
-        bytes_needed = max(bytes_needed, 1)
-        
+
+        bytes_needed = max((max_val.bit_length() + 7) // 8, 1)
+        span = 1 << (8 * bytes_needed)          # 256 ** bytes_needed
+        limit = span - (span % max_val)         # largest unbiased ceiling
+
         while True:
-            raw = self.get_bytes(bytes_needed)
-            val = int.from_bytes(raw, 'big')
-            val = val % (max_val * 2)
-            if val < max_val:
-                return val
+            raw = int.from_bytes(self.get_bytes(bytes_needed), 'big')
+            if raw < limit:
+                return raw % max_val
     
     def shuffle(self, items: List) -> List:
         """
@@ -80,9 +84,32 @@ class KeySeededPRNG:
         """
         if count > len(available):
             raise ValueError(f"Cannot select {count} from {len(available)} positions")
-        
+
         shuffled = self.shuffle(available)
         return shuffled[:count]
+
+    def sample_indices(self, n: int, count: int) -> List[int]:
+        """
+        Select ``count`` distinct indices from ``[0, n)`` without replacement,
+        returned in pseudo-random order.
+
+        Runs in O(count) time and memory using a partial Fisher-Yates shuffle
+        backed by a sparse swap map, so it never materialises the full ``n``
+        candidate list — essential when sampling a small message's worth of
+        positions out of millions of pixels/samples.
+        """
+        if count < 0:
+            raise ValueError("count must be non-negative")
+        if count > n:
+            raise ValueError(f"Cannot select {count} indices from {n}")
+
+        state: dict = {}
+        chosen: List[int] = []
+        for i in range(count):
+            j = i + self.get_int(n - i)          # uniform in [i, n)
+            chosen.append(state.get(j, j))       # a[j]
+            state[j] = state.get(i, i)           # a[j] <- a[i]
+        return chosen
     
     def reset(self):
         """Reset PRNG to initial state."""
@@ -103,19 +130,3 @@ def derive_prng_seed(shared_secret: bytes, context: bytes = b"GhostBit PRNG") ->
         32-byte seed
     """
     return hashlib.sha256(context + shared_secret).digest()
-
-
-def create_embedding_prng(eph_pub: bytes, nonce: bytes) -> KeySeededPRNG:
-    """
-    Create PRNG for embedding/extraction.
-    Uses ephemeral public key and nonce for deterministic seeding.
-    
-    Args:
-        eph_pub: Ephemeral public key bytes
-        nonce: Encryption nonce
-        
-    Returns:
-        KeySeededPRNG instance
-    """
-    seed = hashlib.sha256(b"GhostBit Embed" + eph_pub + nonce).digest()
-    return KeySeededPRNG(seed)

@@ -5,7 +5,6 @@ Sends verification and password-reset codes via Azure Communication Services.
 
 import os
 import logging
-from azure.communication.email import EmailClient
 
 log = logging.getLogger(__name__)
 
@@ -35,6 +34,7 @@ def _send_email(to_email: str, subject: str, html_body: str) -> bool:
         return True
 
     try:
+        from azure.communication.email import EmailClient
         client = EmailClient.from_connection_string(ACS_CONNECTION_STRING)
         message = {
             "senderAddress": FROM_EMAIL,

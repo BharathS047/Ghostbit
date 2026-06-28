@@ -67,14 +67,11 @@ function VerifyContent() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex items-center justify-center gap-2.5 mb-10">
-          <div
-            className="w-9 h-9 rounded-lg flex items-center justify-center"
-            style={{ background: "#6366f1" }}
-          >
-            <span className="text-sm font-black text-white tracking-tighter">
-              GP
-            </span>
-          </div>
+          <img
+            src="/images/ghostplay-logo.png"
+            alt="GhostPlay"
+            className="w-9 h-9 rounded-lg object-contain"
+          />
           <span
             className="font-semibold tracking-tight text-lg"
             style={{ color: "#ececed" }}

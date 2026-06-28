@@ -58,6 +58,15 @@ startup.sh
 
 # Azure
 .env
+.env.local
+**/.env.local
+
+# Local dev artifacts
+_devlog.txt
+*.zip
+
+# Local Claude Code settings (may contain secrets)
+.claude/
 
 # Spline
 🌍 Spline Skill

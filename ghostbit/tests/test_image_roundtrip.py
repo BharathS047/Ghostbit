@@ -45,20 +45,20 @@ class TestEdgeDetection:
     """Tests for edge detection."""
     
     def test_detect_edges_simple_image(self):
-        """Test edge detection returns all pixels (simplified for determinism)."""
+        """A flat image has no edges -> no usable pixels."""
         image = np.ones((100, 100, 3), dtype=np.uint8) * 128
         mask = detect_edge_pixels(image)
-        
-        assert np.sum(mask) == 10000
-    
+
+        assert np.sum(mask) == 0
+
     def test_detect_edges_with_shapes(self):
-        """Test edge detection on image with shapes."""
+        """An image with shapes yields some (but not all) edge pixels."""
         image = np.ones((100, 100, 3), dtype=np.uint8) * 128
         cv2.rectangle(image, (20, 20), (80, 80), (255, 255, 255), 2)
-        
+
         mask = detect_edge_pixels(image)
-        
-        assert np.sum(mask) == 10000
+
+        assert 0 < np.sum(mask) < 10000
 
 
 class TestPixelEmbedding:

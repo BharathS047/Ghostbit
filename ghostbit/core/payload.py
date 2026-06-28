@@ -188,6 +188,66 @@ def unpack_payload(data: bytes) -> PayloadHeader:
     )
 
 
+@dataclass
+class PayloadHeaderInfo:
+    """Header fields parsed from a payload *without* its ciphertext body.
+
+    ``header_size`` is the number of bytes the header occupies (magic … ct_len),
+    i.e. the length of the data slice that was parsed.
+    """
+    media_type: MediaType
+    nonce: bytes
+    eph_pub: bytes
+    ct_len: int
+    header_size: int
+
+
+def unpack_payload_header(data: bytes) -> PayloadHeaderInfo:
+    """
+    Parse only the fixed header (magic … ct_len) of a payload, stopping before
+    the ciphertext. Used during extraction to recover the ephemeral public key
+    and ciphertext length *before* the ciphertext bits are located/read.
+    """
+    if len(data) < 9:
+        raise ValueError("Payload too short for header")
+
+    magic, version, media_type, kex, aead, nonce_len = struct.unpack('>4sBBBBB', data[:9])
+
+    if magic != MAGIC:
+        raise ValueError(f"Invalid magic bytes: expected {MAGIC}, got {magic}")
+    if version != VERSION:
+        raise ValueError(f"Unsupported version: {version}")
+
+    offset = 9
+    if len(data) < offset + nonce_len:
+        raise ValueError("Payload too short for nonce")
+    nonce = data[offset:offset + nonce_len]
+    offset += nonce_len
+
+    if len(data) < offset + 2:
+        raise ValueError("Payload too short for eph_pub_len")
+    eph_pub_len = struct.unpack('>H', data[offset:offset + 2])[0]
+    offset += 2
+
+    if len(data) < offset + eph_pub_len:
+        raise ValueError("Payload too short for eph_pub")
+    eph_pub = data[offset:offset + eph_pub_len]
+    offset += eph_pub_len
+
+    if len(data) < offset + 4:
+        raise ValueError("Payload too short for ct_len")
+    ct_len = struct.unpack('>I', data[offset:offset + 4])[0]
+    offset += 4
+
+    return PayloadHeaderInfo(
+        media_type=MediaType(media_type),
+        nonce=nonce,
+        eph_pub=eph_pub,
+        ct_len=ct_len,
+        header_size=offset,
+    )
+
+
 def payload_to_bits(payload: bytes) -> list:
     """Convert payload bytes to list of bits."""
     bits = []

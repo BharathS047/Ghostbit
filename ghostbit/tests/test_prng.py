@@ -3,9 +3,7 @@ Tests for key-seeded PRNG.
 """
 
 import pytest
-from ghostbit.core.prng import (
-    KeySeededPRNG, derive_prng_seed, create_embedding_prng
-)
+from ghostbit.core.prng import KeySeededPRNG, derive_prng_seed
 
 
 class TestKeySeededPRNG:
@@ -152,32 +150,19 @@ class TestPRNGSeedDerivation:
 
 
 class TestEmbeddingPRNG:
-    """Tests for embedding PRNG creation."""
-    
-    def test_create_embedding_prng_deterministic(self):
-        """Test that embedding PRNG is deterministic."""
-        eph_pub = b'\x01' * 32
-        nonce = b'\x02' * 12
-        
-        prng1 = create_embedding_prng(eph_pub, nonce)
-        prng2 = create_embedding_prng(eph_pub, nonce)
-        
+    """The embedding PRNG must be driven by the (secret) ECDH shared secret."""
+
+    def test_shared_secret_prng_deterministic(self):
+        """Same shared secret -> same PRNG stream (sender and receiver agree)."""
+        secret = b'\x07' * 32
+        prng1 = KeySeededPRNG(derive_prng_seed(secret))
+        prng2 = KeySeededPRNG(derive_prng_seed(secret))
+
         assert prng1.get_bytes(64) == prng2.get_bytes(64)
-    
-    def test_different_eph_pub_different_prng(self):
-        """Test that different eph_pub produces different PRNG."""
-        nonce = b'\x00' * 12
-        
-        prng1 = create_embedding_prng(b'\x01' * 32, nonce)
-        prng2 = create_embedding_prng(b'\x02' * 32, nonce)
-        
-        assert prng1.get_bytes(32) != prng2.get_bytes(32)
-    
-    def test_different_nonce_different_prng(self):
-        """Test that different nonce produces different PRNG."""
-        eph_pub = b'\x00' * 32
-        
-        prng1 = create_embedding_prng(eph_pub, b'\x01' * 12)
-        prng2 = create_embedding_prng(eph_pub, b'\x02' * 12)
-        
+
+    def test_different_secret_different_prng(self):
+        """A different shared secret yields different embedding positions."""
+        prng1 = KeySeededPRNG(derive_prng_seed(b'\x01' * 32))
+        prng2 = KeySeededPRNG(derive_prng_seed(b'\x02' * 32))
+
         assert prng1.get_bytes(32) != prng2.get_bytes(32)

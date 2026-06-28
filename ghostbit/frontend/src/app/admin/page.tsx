@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import RouteGuard from "../../components/RouteGuard";
 import { useAuth } from "../../context/AuthContext";
 
@@ -59,15 +60,13 @@ function AdminDashboard() {
       >
         <div className="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{
-                background: "linear-gradient(135deg, #ef4444, #991b1b)",
-                boxShadow: "0 0 22px rgba(239,68,68,0.38)",
-              }}
-            >
-              <span className="text-xs font-black text-white tracking-tighter">GB</span>
-            </div>
+            <Image
+              src="/images/ghostbit-logo.png"
+              alt="GhostBit"
+              width={32}
+              height={32}
+              style={{ objectFit: "cover", filter: "hue-rotate(120deg) saturate(1.4)", mixBlendMode: "screen" }}
+            />
             <span className="font-bold tracking-tight text-gradient text-base">GhostBit</span>
             <span
               className="ml-2 text-xs font-mono px-2 py-0.5 rounded"

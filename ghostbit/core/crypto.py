@@ -3,15 +3,15 @@ Cryptographic operations for GhostBit.
 Implements X25519 key exchange, HKDF key derivation, and AES-256-GCM encryption.
 """
 
-import os
 import secrets
-from typing import Tuple, Optional
+from typing import Tuple
 
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X25519PublicKey
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.backends import default_backend
+from cryptography.exceptions import InvalidTag
 
 
 HKDF_INFO = b"GhostBit AES-256 Key"
@@ -98,9 +98,11 @@ class Encryptor:
         self.receiver_public_key = receiver_public_key
         self.ephemeral_private = X25519PrivateKey.generate()
         self.ephemeral_public = self.ephemeral_private.public_key()
-        
-        shared_secret = self.ephemeral_private.exchange(receiver_public_key)
-        self.aes_key = derive_aes_key(shared_secret)
+
+        # Retained so the steganography layer can seed its position PRNG from
+        # the shared secret (never transmitted, unlike the ephemeral pubkey).
+        self.shared_secret = self.ephemeral_private.exchange(receiver_public_key)
+        self.aes_key = derive_aes_key(self.shared_secret)
     
     def encrypt(self, plaintext: bytes) -> Tuple[bytes, bytes, bytes]:
         """
@@ -133,26 +135,41 @@ class Decryptor:
     
     def __init__(self, private_key: X25519PrivateKey):
         self.private_key = private_key
-    
+
+    def derive_shared_secret(self, eph_pub_bytes: bytes) -> bytes:
+        """Reconstruct the ECDH shared secret from the sender's ephemeral key.
+
+        Exposed so the steganography layer can seed its position PRNG with the
+        same secret value the sender used, before decryption.
+        """
+        eph_public_key = X25519PublicKey.from_public_bytes(eph_pub_bytes)
+        return self.private_key.exchange(eph_public_key)
+
     def decrypt(self, nonce: bytes, eph_pub_bytes: bytes, ciphertext: bytes) -> bytes:
         """
         Decrypt ciphertext using AES-256-GCM.
-        
+
         Args:
             nonce: 12-byte nonce
             eph_pub_bytes: Ephemeral public key (32 bytes raw)
             ciphertext: Encrypted data with GCM tag
-            
+
         Returns:
             Decrypted plaintext
+
+        Raises:
+            ValueError: if authentication fails (wrong key, or corrupted/forged data).
         """
-        eph_public_key = X25519PublicKey.from_public_bytes(eph_pub_bytes)
-        shared_secret = self.private_key.exchange(eph_public_key)
-        aes_key = derive_aes_key(shared_secret)
-        
+        aes_key = derive_aes_key(self.derive_shared_secret(eph_pub_bytes))
+
         aesgcm = AESGCM(aes_key)
-        plaintext = aesgcm.decrypt(nonce, ciphertext, None)
-        
+        try:
+            plaintext = aesgcm.decrypt(nonce, ciphertext, None)
+        except InvalidTag:
+            raise ValueError(
+                "Decryption failed: wrong private key or corrupted/forged stego file"
+            ) from None
+
         return plaintext
 
 

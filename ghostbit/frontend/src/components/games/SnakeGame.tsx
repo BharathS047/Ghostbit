@@ -227,6 +227,7 @@ export default function SnakeGame({ onScore }: Props) {
             display: "block",
           }}
         />
+
         {gameState !== "playing" && (
           <div
             className="absolute inset-0 flex flex-col items-center justify-center rounded-xl"

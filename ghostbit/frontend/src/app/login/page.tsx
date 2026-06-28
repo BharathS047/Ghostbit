@@ -154,14 +154,11 @@ function LoginForm() {
       <div className="w-full max-w-md" style={{ position: "relative", zIndex: 1 }}>
         {/* Logo */}
         <div className="flex items-center justify-center gap-2.5 mb-10">
-          <div
-            className="w-9 h-9 rounded-lg flex items-center justify-center"
-            style={{ background: "#6366f1" }}
-          >
-            <span className="text-sm font-black text-white tracking-tighter">
-              GP
-            </span>
-          </div>
+          <img
+            src="/images/ghostplay-logo.png"
+            alt="GhostPlay"
+            className="w-9 h-9 rounded-lg object-contain"
+          />
           <span
             className="font-semibold tracking-tight text-lg"
             style={{ color: "#ececed" }}
@@ -371,9 +368,10 @@ function LoginForm() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-lg leading-none select-none transition-transform hover:scale-110"
-                      style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-md transition-all duration-150 hover:scale-125 active:scale-95"
+                      style={{ background: "none", border: "none", cursor: "pointer", padding: "0.25rem", minWidth: 36, minHeight: 36, fontSize: "1.25rem", lineHeight: 1 }}
                       aria-label={showPassword ? "Hide password" : "Show password"}
+                      title={showPassword ? "Hide password" : "Show password"}
                     >
                       {showPassword ? "🐵" : "🙈"}
                     </button>

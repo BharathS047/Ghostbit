@@ -13,9 +13,9 @@ const JUMP_VY = -13;
 const OBSTACLE_W = 18;
 const OBSTACLE_MIN_H = 28;
 const OBSTACLE_MAX_H = 52;
-const INITIAL_SPEED = 5;
-const SPEED_INC_INTERVAL = 300; // frames between speed bumps
-const SPEED_INC_AMOUNT = 0.3;
+const INITIAL_SPEED = 3;
+const SPEED_INC_INTERVAL = 360; // frames between speed bumps (~6s at 60fps)
+const SPEED_INC_AMOUNT = 0.4;
 const MAX_JUMPS = 2; // double-jump
 
 interface Obstacle {

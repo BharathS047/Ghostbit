@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense, lazy } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -8,8 +8,10 @@ const TicTacToe = lazy(() => import("../../components/games/TicTacToe"));
 const SnakeGame = lazy(() => import("../../components/games/SnakeGame"));
 const MemoryMatch = lazy(() => import("../../components/games/MemoryMatch"));
 const PixelRunner = lazy(() => import("../../components/games/PixelRunner"));
+const PongGame = lazy(() => import("../../components/games/PongGame"));
 
 import HeroSection from "../../components/HeroSection";
+import MonkeyEasterEggs from "../../components/MonkeyEasterEggs";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -77,6 +79,18 @@ const GAMES: GameDef[] = [
     players: "Solo",
   },
   {
+    id: "pong",
+    title: "Pong",
+    desc: "The original. Two paddles, one ball. Beat the bot to 7 points.",
+    thumbnail: "/images/thumb-pong.svg",
+    gradient: "linear-gradient(135deg, #1e1b4b, #0f0e2a)",
+    badgeColor: "#818cf8",
+    badgeBg: "rgba(129,140,248,0.1)",
+    badgeLabel: "Classic",
+    category: "arcade",
+    players: "vs Bot",
+  },
+  {
     id: "coming2",
     title: "Battleships",
     desc: "Naval warfare on a grid. Multiplayer coming soon!",
@@ -87,18 +101,6 @@ const GAMES: GameDef[] = [
     badgeLabel: "Coming Soon",
     category: "strategy",
     players: "1v1",
-  },
-  {
-    id: "coming3",
-    title: "Word Scramble",
-    desc: "Unscramble letters against the clock. Coming soon!",
-    thumbnail: "/images/thumb-word-scramble.svg",
-    gradient: "linear-gradient(135deg, #831843, #0f172a)",
-    badgeColor: "#f472b6",
-    badgeBg: "rgba(244,114,182,0.1)",
-    badgeLabel: "Coming Soon",
-    category: "puzzle",
-    players: "Solo",
   },
 ];
 
@@ -157,29 +159,30 @@ export default function PlayPage() {
   // If a game is open, show the game overlay
   if (activeGame) {
     return (
-      <GameOverlay
-        gameId={activeGame}
-        onClose={() => setActiveGame(null)}
-        onScore={(score) => handleScore(activeGame, score)}
-      />
+      <>
+        <GameOverlay
+          gameId={activeGame}
+          onClose={() => setActiveGame(null)}
+          onScore={(score) => handleScore(activeGame, score)}
+        />
+        <MonkeyEasterEggs />
+      </>
     );
   }
 
   return (
     <div style={{ background: "#030712", minHeight: "100vh" }}>
+      <MonkeyEasterEggs />
       {/* ── Navigation bar ── */}
       <nav className="portal-nav">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{
-                background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-                boxShadow: "0 0 18px rgba(99,102,241,0.35)",
-              }}
-            >
-              <span className="text-xs font-black text-white">GP</span>
-            </div>
+            <img
+              src="/images/ghostplay-logo.png"
+              alt="GhostPlay"
+              className="w-8 h-8 rounded-lg object-contain"
+              style={{ boxShadow: "0 0 18px rgba(99,102,241,0.35)" }}
+            />
             <span className="font-bold tracking-tight text-base" style={{ color: "#e2e8f0" }}>
               GhostPlay
             </span>
@@ -208,13 +211,7 @@ export default function PlayPage() {
             {user ? (
               <>
                 <div className="flex items-center gap-2">
-                  <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
-                    style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "#fff" }}
-                  >
-                    {user.username[0].toUpperCase()}
-                  </div>
-                  <span className="hidden sm:inline text-xs font-mono" style={{ color: "#94a3b8" }}>
+                  <span className="text-xs font-mono" style={{ color: "#94a3b8" }}>
                     {user.username}
                   </span>
                 </div>
@@ -452,29 +449,6 @@ export default function PlayPage() {
 
                 {/* Player info tile */}
                 <div className="game-card portal-animate portal-animate-d2" style={{ cursor: "default" }}>
-                  <div
-                    className="game-card-thumb"
-                    style={{ background: "linear-gradient(135deg, #1e1b4b, #0f0e2a)" }}
-                  >
-                    <div
-                      style={{
-                        zIndex: 2,
-                        width: 64,
-                        height: 64,
-                        borderRadius: "50%",
-                        background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "1.8rem",
-                        fontWeight: 700,
-                        color: "#fff",
-                        boxShadow: "0 0 24px rgba(99,102,241,0.4)",
-                      }}
-                    >
-                      {user.username[0].toUpperCase()}
-                    </div>
-                  </div>
                   <div className="game-card-body">
                     <p className="game-card-title">{user.username}</p>
                     <p className="game-card-desc">Free Player</p>
@@ -507,12 +481,11 @@ export default function PlayPage() {
         <footer className="mt-12 border-t" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <div
-                className="w-5 h-5 rounded flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #6366f1, #4f46e5)" }}
-              >
-                <span className="text-[8px] font-black text-white">GP</span>
-              </div>
+              <img
+                src="/images/ghostplay-logo.png"
+                alt="GhostPlay"
+                className="w-5 h-5 rounded object-contain"
+              />
               <span className="text-xs font-semibold" style={{ color: "#475569" }}>
                 GhostPlay
               </span>
@@ -586,6 +559,7 @@ function GameOverlay({
           {gameId === "snake" && <SnakeGame onScore={onScore} />}
           {gameId === "memory" && <MemoryMatch onScore={onScore} />}
           {gameId === "pixelrunner" && <PixelRunner onScore={onScore} />}
+          {gameId === "pong" && <PongGame onScore={onScore} />}
         </Suspense>
       </div>
       <p className="text-xs font-mono pb-4" style={{ color: "#334155" }}>

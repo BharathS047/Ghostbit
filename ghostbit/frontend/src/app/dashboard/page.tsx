@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import KeyGenerator from "../../components/KeyGenerator";
 import EmbedForm from "../../components/EmbedForm";
 import ExtractForm from "../../components/ExtractForm";
@@ -9,7 +10,7 @@ import RouteGuard from "../../components/RouteGuard";
 import { useAuth } from "../../context/AuthContext";
 
 const ParticleSphere = dynamic(() => import("../../components/ParticleSphere"), { ssr: false });
-const PipelineAnimation = dynamic(() => import("../../components/PipelineAnimation"), { ssr: false });
+const WorkflowPipeline = dynamic(() => import("../../components/WorkflowPipeline"), { ssr: false });
 
 type Tab = "home" | "keys" | "embed" | "extract";
 
@@ -25,12 +26,18 @@ function DashboardContent() {
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 48);
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
+
+  function navigate(tab: Tab) {
+    setActiveTab(tab);
+    setMenuOpen(false);
+  }
 
   const isHome = activeTab === "home";
 
@@ -46,17 +53,84 @@ function DashboardContent() {
           borderBottom: scrolled || !isHome ? "1px solid var(--border-subtle)" : "1px solid transparent",
         }}
       >
+        {/* ── Mobile header (< md) ── */}
         <div
-          className="max-w-7xl mx-auto h-14 flex items-center justify-between"
-          style={{ padding: "0 clamp(1rem, 4vw, 2rem)" }}
+          className="md:hidden flex items-center justify-between h-14"
+          style={{ padding: "0 clamp(1rem, 4vw, 1.5rem)" }}
         >
-          <button onClick={() => setActiveTab("home")} className="flex items-center gap-2.5 shrink-0">
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: "var(--accent-primary)" }}
-            >
-              <span className="text-xs font-black text-white tracking-tighter">GB</span>
+          <button onClick={() => navigate("home")} className="flex items-center gap-2 shrink-0">
+            <Image
+              src="/images/ghostbit-logo.png"
+              alt="GhostBit"
+              width={26}
+              height={26}
+              style={{ objectFit: "cover", filter: "hue-rotate(120deg) saturate(1.4)", mixBlendMode: "screen" }}
+            />
+            <span className="font-bold tracking-tight text-gradient text-sm">GhostBit</span>
+          </button>
+          <button
+            onClick={() => setMenuOpen((o) => !o)}
+            className="flex flex-col gap-1.5 p-2.5 rounded-md transition-colors"
+            style={{ background: menuOpen ? "rgba(255,255,255,0.06)" : "transparent", border: "1px solid transparent", minWidth: 44, minHeight: 44, alignItems: "center", justifyContent: "center" }}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+          >
+            <span className="block w-5 h-0.5 rounded transition-all" style={{ background: "var(--text-secondary)", transform: menuOpen ? "translateY(5px) rotate(45deg)" : "none" }} />
+            <span className="block w-5 h-0.5 rounded transition-all" style={{ background: "var(--text-secondary)", opacity: menuOpen ? 0 : 1 }} />
+            <span className="block w-5 h-0.5 rounded transition-all" style={{ background: "var(--text-secondary)", transform: menuOpen ? "translateY(-5px) rotate(-45deg)" : "none" }} />
+          </button>
+        </div>
+
+        {/* ── Mobile dropdown ── */}
+        {menuOpen && (
+          <div
+            className="md:hidden"
+            style={{
+              background: "rgba(3,7,18,0.97)",
+              borderTop: "1px solid var(--border-subtle)",
+              backdropFilter: "blur(24px)",
+            }}
+          >
+            {(["keys", "embed", "extract"] as Tab[]).map((id) => (
+              <button
+                key={id}
+                onClick={() => navigate(id)}
+                className="w-full text-left px-6 py-4 text-sm font-medium transition-colors"
+                style={{
+                  color: activeTab === id ? "var(--text-primary)" : "var(--text-muted)",
+                  background: activeTab === id ? "rgba(255,255,255,0.04)" : "transparent",
+                  borderBottom: "1px solid var(--border-subtle)",
+                  borderLeft: activeTab === id ? "2px solid var(--accent-primary)" : "2px solid transparent",
+                }}
+              >
+                {id.charAt(0).toUpperCase() + id.slice(1)}
+              </button>
+            ))}
+            <div className="flex items-center justify-between px-6 py-4">
+              <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>{user?.username}</span>
+              <button
+                onClick={logout}
+                className="text-xs font-mono px-4 py-2 rounded-md"
+                style={{ color: "var(--text-secondary)", border: "1px solid var(--border-subtle)", minHeight: 36 }}
+              >
+                Logout
+              </button>
             </div>
+          </div>
+        )}
+
+        {/* ── Desktop header (md+) — 3-column grid ── */}
+        <div
+          className="hidden md:grid max-w-7xl mx-auto h-14 items-center"
+          style={{ padding: "0 clamp(1rem, 4vw, 2rem)", gridTemplateColumns: "1fr auto 1fr" }}
+        >
+          <button onClick={() => navigate("home")} className="flex items-center gap-2.5 shrink-0 justify-self-start">
+            <Image
+              src="/images/ghostbit-logo.png"
+              alt="GhostBit"
+              width={28}
+              height={28}
+              style={{ objectFit: "cover", filter: "hue-rotate(120deg) saturate(1.4)", mixBlendMode: "screen" }}
+            />
             <span
               className="font-bold tracking-tight text-gradient"
               style={{ fontSize: "clamp(0.8rem, 1.5vw, 1rem)" }}
@@ -69,34 +143,36 @@ function DashboardContent() {
             {(["keys", "embed", "extract"] as Tab[]).map((id) => (
               <button
                 key={id}
-                onClick={() => setActiveTab(id)}
+                onClick={() => navigate(id)}
                 className={`tab-btn ${activeTab === id ? "active" : ""}`}
-                style={{ fontSize: "clamp(0.7rem, 1.2vw, 0.85rem)", padding: "0.3rem clamp(0.5rem, 1.5vw, 0.9rem)" }}
+                style={{ fontSize: "clamp(0.7rem, 1.2vw, 0.85rem)", padding: "0.55rem clamp(0.5rem, 1.5vw, 0.9rem)" }}
               >
                 {id.charAt(0).toUpperCase() + id.slice(1)}
               </button>
             ))}
-            <div className="flex items-center" style={{ gap: "clamp(0.5rem, 1.5vw, 0.75rem)", marginLeft: "clamp(0.5rem, 2vw, 1rem)" }}>
-              <span
-                className="hidden sm:inline font-mono"
-                style={{ color: "var(--text-muted)", fontSize: "clamp(0.65rem, 1vw, 0.75rem)" }}
-              >
-                {user?.username}
-              </span>
-              <button
-                onClick={logout}
-                className="font-mono rounded-md transition-colors"
-                style={{
-                  color: "var(--text-secondary)",
-                  border: "1px solid var(--border-subtle)",
-                  fontSize: "clamp(0.65rem, 1vw, 0.75rem)",
-                  padding: "0.3rem clamp(0.5rem, 1.5vw, 0.75rem)",
-                }}
-              >
-                Logout
-              </button>
-            </div>
           </nav>
+
+          <div className="flex items-center justify-self-end" style={{ gap: "clamp(0.5rem, 1.5vw, 0.75rem)" }}>
+            <span
+              className="hidden lg:inline font-mono"
+              style={{ color: "var(--text-muted)", fontSize: "clamp(0.65rem, 1vw, 0.75rem)" }}
+            >
+              {user?.username}
+            </span>
+            <button
+              onClick={logout}
+              className="font-mono rounded-md transition-colors"
+              style={{
+                color: "var(--text-secondary)",
+                border: "1px solid var(--border-subtle)",
+                fontSize: "clamp(0.65rem, 1vw, 0.75rem)",
+                padding: "0.45rem clamp(0.5rem, 1.5vw, 0.75rem)",
+                minHeight: "2.25rem",
+              }}
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </header>
 
@@ -301,11 +377,11 @@ function HeroSection({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
 
           {/* Pipeline */}
           <div className="animate-fade-in-up" style={{ marginBottom: "clamp(2rem, 4vh, 4rem)", animationDelay: "0.1s" }}>
-            <PipelineAnimation />
+            <WorkflowPipeline />
           </div>
 
           {/* Step cards */}
-          <div className="grid md:grid-cols-3 gap-5 stagger">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 stagger">
             {[
               { num: "01", title: "Generate Keys", desc: "The receiver creates an X25519 elliptic-curve keypair. Share only the public key.", tab: "keys" as Tab, accent: "#dc2626", border: "rgba(220,38,38,0.12)" },
               { num: "02", title: "Embed Message", desc: "Encrypt with AES-256-GCM and hide the ciphertext inside a PNG, WAV, or MP4 file.", tab: "embed" as Tab, accent: "#ef4444", border: "rgba(239,68,68,0.12)" },
@@ -383,7 +459,7 @@ function HeroSection({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
       >
         <p
           className="font-mono"
-          style={{ color: "var(--text-muted)", fontSize: "clamp(0.6rem, 1vw, 0.75rem)" }}
+          style={{ color: "var(--text-muted)", fontSize: "clamp(0.7rem, 1vw, 0.75rem)" }}
         >
           GhostBit v1.0 &nbsp;&middot;&nbsp; Secure Steganography Framework
           &nbsp;&middot;&nbsp; AES-256-GCM + X25519 + HKDF-SHA256

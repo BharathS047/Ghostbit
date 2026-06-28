@@ -23,7 +23,7 @@ jobs:
       - name: Install and build
         working-directory: ghostbit/frontend
         env:
-          NEXT_PUBLIC_API_URL: https://ghostbit-api.azurewebsites.net
+          NEXT_PUBLIC_API_URL: https://ghostbit-backend-ans9vo.azurewebsites.net
         run: |
           npm ci
           npm run build

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" fill="none">
+  <!-- Background -->
+  <rect width="320" height="200" fill="#020a14"/>
+  <!-- Center dashed line -->
+  <line x1="160" y1="0" x2="160" y2="200" stroke="rgba(255,255,255,0.08)" stroke-width="2" stroke-dasharray="10 10"/>
+  <!-- Score -->
+  <text x="110" y="44" font-family="monospace" font-size="28" font-weight="bold" fill="rgba(129,140,248,0.25)" text-anchor="middle">3</text>
+  <text x="210" y="44" font-family="monospace" font-size="28" font-weight="bold" fill="rgba(248,113,113,0.25)" text-anchor="middle">5</text>
+  <!-- Player paddle (left) -->
+  <rect x="14" y="72" width="10" height="56" rx="4" fill="#818cf8" filter="url(#glow-blue)"/>
+  <!-- Bot paddle (right) -->
+  <rect x="296" y="56" width="10" height="56" rx="4" fill="#f87171" filter="url(#glow-red)"/>
+  <!-- Ball -->
+  <circle cx="192" cy="118" r="7" fill="#fff" filter="url(#glow-white)"/>
+  <!-- Ball trail -->
+  <circle cx="178" cy="112" r="4" fill="rgba(255,255,255,0.2)"/>
+  <circle cx="165" cy="107" r="2.5" fill="rgba(255,255,255,0.1)"/>
+  <defs>
+    <filter id="glow-blue" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-red" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-white" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+</svg>

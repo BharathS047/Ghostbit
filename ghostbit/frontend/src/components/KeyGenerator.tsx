@@ -7,9 +7,11 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 export default function KeyGenerator() {
   const [keys, setKeys] = useState<{ public: string; private: string } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const generateKeys = async () => {
     setLoading(true);
+    setError("");
     try {
       const token = localStorage.getItem("ghostbit_token");
       const res = await fetch(`${API}/api/keys/generate`, {
@@ -19,7 +21,7 @@ export default function KeyGenerator() {
       const data = await res.json();
       setKeys({ public: data.public_key, private: data.private_key });
     } catch {
-      alert("Failed to connect to backend API.");
+      setError("Failed to connect to the backend. Make sure the server is running.");
     } finally {
       setLoading(false);
     }
@@ -51,6 +53,18 @@ export default function KeyGenerator() {
         </p>
       </div>
 
+      {/* Inline error */}
+      {error && (
+        <div
+          role="alert"
+          className="flex items-start gap-2.5 text-xs font-mono px-4 py-3 rounded-lg"
+          style={{ color: "#f87171", background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.2)" }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          {error}
+        </div>
+      )}
+
       {/* Generate Button */}
       <button onClick={generateKeys} disabled={loading} className="btn-primary text-base w-full sm:w-auto px-8 py-3.5">
         {loading ? (
@@ -74,10 +88,10 @@ export default function KeyGenerator() {
             <div className="flex items-center justify-between">
               <span className="badge badge-red">Private Key — SECRET</span>
               <div className="flex gap-2">
-                <button onClick={() => copyToClipboard(keys.private)} className="text-xs px-3 py-1 rounded-full transition" style={{ background: "rgba(185,28,28,0.1)", color: "#b91c1c", border: "1px solid rgba(185,28,28,0.2)" }}>
+                <button onClick={() => copyToClipboard(keys.private)} className="text-xs px-3 py-1.5 rounded-full transition" style={{ background: "rgba(185,28,28,0.1)", color: "#b91c1c", border: "1px solid rgba(185,28,28,0.2)", minHeight: 32 }}>
                   Copy
                 </button>
-                <button onClick={() => downloadKey("private", keys.private)} className="text-xs px-3 py-1 rounded-full transition" style={{ background: "rgba(185,28,28,0.1)", color: "#b91c1c", border: "1px solid rgba(185,28,28,0.2)" }}>
+                <button onClick={() => downloadKey("private", keys.private)} className="text-xs px-3 py-1.5 rounded-full transition" style={{ background: "rgba(185,28,28,0.1)", color: "#b91c1c", border: "1px solid rgba(185,28,28,0.2)", minHeight: 32 }}>
                   Download
                 </button>
               </div>
@@ -92,10 +106,10 @@ export default function KeyGenerator() {
             <div className="flex items-center justify-between">
               <span className="badge badge-secondary">Public Key — SHARE</span>
               <div className="flex gap-2">
-                <button onClick={() => copyToClipboard(keys.public)} className="text-xs px-3 py-1 rounded-full transition" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>
+                <button onClick={() => copyToClipboard(keys.public)} className="text-xs px-3 py-1.5 rounded-full transition" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", minHeight: 32 }}>
                   Copy
                 </button>
-                <button onClick={() => downloadKey("public", keys.public)} className="text-xs px-3 py-1 rounded-full transition" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>
+                <button onClick={() => downloadKey("public", keys.public)} className="text-xs px-3 py-1.5 rounded-full transition" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", minHeight: 32 }}>
                   Download
                 </button>
               </div>
