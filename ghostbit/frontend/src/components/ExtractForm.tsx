@@ -65,8 +65,8 @@ export default function ExtractForm() {
           onDrop={handleDrop}
           onClick={() => fileRef.current?.click()}
           className="relative rounded-xl border-2 border-dashed transition-all duration-300 cursor-pointer text-center"
-          style={{ padding: "clamp(1.25rem, 4vw, 2rem)" }}
           style={{
+            padding: "clamp(1.25rem, 4vw, 2rem)",
             borderColor: isDragging ? "var(--accent-extract)" : file ? "var(--accent-extract)" : "var(--border-subtle)",
             background: isDragging ? "rgba(185,28,28,0.05)" : file ? "rgba(185,28,28,0.05)" : "rgba(0,0,0,0.2)",
           }}

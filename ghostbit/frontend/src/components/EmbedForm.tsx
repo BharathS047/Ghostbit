@@ -94,8 +94,8 @@ export default function EmbedForm() {
           onDrop={handleDrop}
           onClick={() => fileRef.current?.click()}
           className="relative rounded-xl border-2 border-dashed transition-all duration-300 cursor-pointer text-center"
-          style={{ padding: "clamp(1.25rem, 4vw, 2rem)" }}
           style={{
+            padding: "clamp(1.25rem, 4vw, 2rem)",
             borderColor: isDragging ? "var(--accent-primary)" : file ? "var(--accent-secondary)" : "var(--border-subtle)",
             background: isDragging ? "rgba(239,68,68,0.05)" : file ? "rgba(220,38,38,0.05)" : "rgba(0,0,0,0.2)",
           }}
