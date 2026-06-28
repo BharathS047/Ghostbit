@@ -96,6 +96,12 @@ async def analyze_capacity_endpoint(
             raise HTTPException(status_code=400, detail="Unsupported file format")
 
         return {"media_type": media_type, "capacity": capacity}
+    except HTTPException:
+        raise
+    except ValueError as e:
+        # User-attributable failures: wrong key, corrupted/forged file,
+        # no hidden payload, invalid key PEM, unsupported parameters, etc.
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -138,6 +144,12 @@ async def embed_endpoint(
         }
         return Response(content=stego_data, media_type=mime_type, headers=headers)
 
+    except HTTPException:
+        raise
+    except ValueError as e:
+        # User-attributable failures: wrong key, corrupted/forged file,
+        # no hidden payload, invalid key PEM, unsupported parameters, etc.
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -173,6 +185,12 @@ async def extract_endpoint(
             "metadata": metadata
         }
 
+    except HTTPException:
+        raise
+    except ValueError as e:
+        # User-attributable failures: wrong key, corrupted/forged file,
+        # no hidden payload, invalid key PEM, unsupported parameters, etc.
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
